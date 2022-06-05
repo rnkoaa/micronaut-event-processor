@@ -1,0 +1,8 @@
+{
+  "type": "io.richard.event.ProductCreatedEvent",
+  "name": "ProductCreatedEvent",
+  "data": {
+    "product_id": "9bb3d5a7-30a3-4875-a9d0-13be882bb35d",
+    "name": "product 1"
+  }
+}
