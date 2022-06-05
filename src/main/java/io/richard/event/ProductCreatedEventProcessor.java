@@ -1,5 +1,6 @@
 package io.richard.event;
 
+import io.richard.event.annotations.KafkaEventProcessor;
 import jakarta.inject.Singleton;
 
 @Singleton

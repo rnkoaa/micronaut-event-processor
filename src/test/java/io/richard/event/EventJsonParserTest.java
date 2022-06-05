@@ -4,6 +4,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import io.micronaut.core.io.ResourceLoader;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import io.richard.event.annotations.Event;
 import jakarta.inject.Inject;
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,8 +1,9 @@
 package io.richard.event;
 
-import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.Topic;
+import io.richard.event.annotations.Event;
+import io.richard.event.annotations.EventProcessorGroup;
 import java.io.IOException;
 import java.util.Collections;
 import org.apache.kafka.clients.consumer.Consumer;

@@ -1,4 +1,4 @@
-package io.richard.event;
+package io.richard.event.annotations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.Objects;

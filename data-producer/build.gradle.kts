@@ -1,19 +1,23 @@
 plugins {
+    id("java")
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("io.micronaut.application") version "3.4.1"
 }
 
-version = "0.1"
 group = "io.richard.event"
+version = "0.1"
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation(project(":annotations"))
-    implementation(project(":event-annotation-processor"))
-    annotationProcessor(project(":event-annotation-processor"))
+    implementation("com.fasterxml.jackson.core:jackson-core:2.13.3")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.3")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-csv:2.13.3")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.13.3")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.3")
 
     annotationProcessor("io.micronaut:micronaut-http-validation")
     implementation("io.micronaut:micronaut-http-client")
@@ -23,10 +27,17 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     implementation("io.micronaut:micronaut-validation")
     testImplementation("org.assertj:assertj-core:3.23.1")
+
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.1")
+}
+
+tasks.getByName<Test>("test") {
+    useJUnitPlatform()
 }
 
 application {
-    mainClass.set("io.richard.event.Application")
+    mainClass.set("io.richard.superstore.DataProducerApp")
 }
 java {
     sourceCompatibility = JavaVersion.toVersion("17")
@@ -42,6 +53,3 @@ micronaut {
         annotations("io.richard.event.*")
     }
 }
-
-
-

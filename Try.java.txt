@@ -1,0 +1,164 @@
+package org.richard;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+public sealed interface Try<T> {
+
+    boolean isSuccessful();
+
+    boolean isFailure();
+
+    T get();
+
+    T orElse(T defaultValue);
+
+    T orElseGet(Supplier<T> defaultValue);
+
+    Try<T> filter(Predicate<T> predicate, String message);
+
+    <U> Try<U> map(Function<T, U> func);
+
+    <U> Try<U> flatMap(Function<T, Try<U>> func);
+
+    static <T> Try<T> success(T value) {
+        return new Success<>(value);
+    }
+
+    static <T> Try<T> failure(Exception exception) {
+        return new Failure<>(exception);
+    }
+
+    static <T> Try<T> failure(String message) {
+        return new Failure<>(new Exception(message));
+    }
+
+    static <T> Try<T> failure(String message, Exception ex) {
+        return new Failure<>(new Exception(message, ex));
+    }
+
+    static <T> Try<T> failure(Failure<T> failure) {
+        return new Failure<>(failure.exception);
+    }
+
+    static <T> Try<T> ofNullable(T value) {
+        return (value == null) ? failure("value is null") : success(value);
+    }
+
+    static <T> Try<T> of(Supplier<T> supplier) {
+        try {
+            T t = supplier.get();
+            return new Success<>(t);
+        } catch (Exception ex) {
+            return new Failure<>(ex);
+        }
+    }
+
+    record Success<T>(T value) implements Try<T> {
+
+        @Override
+        public boolean isSuccessful() {
+            return true;
+        }
+
+        @Override
+        public boolean isFailure() {
+            return false;
+        }
+
+        @Override
+        public T get() {
+            return this.value;
+        }
+
+        @Override
+        public T orElse(T defaultValue) {
+            return value;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> defaultValue) {
+            return value;
+        }
+
+        @Override
+        public Try<T> filter(Predicate<T> predicate, String message) {
+            try {
+                if (predicate.test(this.value)) {
+                    return new Success<>(this.value);
+                } else {
+                    return failure(message);
+                }
+            } catch (Exception ex) {
+                return failure(ex);
+            }
+        }
+
+        @Override
+        public <U> Try<U> map(Function<T, U> func) {
+            try {
+                return new Success<>(func.apply(value));
+            } catch (Exception ex) {
+                return new Failure<>(ex);
+            }
+        }
+
+        @Override
+        public <U> Try<U> flatMap(Function<T, Try<U>> func) {
+            try {
+                return func.apply(value);
+            } catch (Exception ex) {
+                return new Failure<>(ex);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "Success{" + "value=" + value + '}';
+        }
+    }
+
+    record Failure<T>(Exception exception) implements Try<T> {
+
+        @Override
+        public boolean isSuccessful() {
+            return false;
+        }
+
+        @Override
+        public boolean isFailure() {
+            return true;
+        }
+
+        @Override
+        public T get() {
+            throw new RuntimeException("attempting to get value from a failed operation " + exception.getMessage());
+        }
+
+        @Override
+        public T orElse(T defaultValue) {
+            return defaultValue;
+        }
+
+        @Override
+        public T orElseGet(Supplier<T> defaultValue) {
+            return defaultValue.get();
+        }
+
+        @Override
+        public Try<T> filter(Predicate<T> predicate, String message) {
+            return new Failure<>(this.exception);
+        }
+
+        @Override
+        public <U> Try<U> map(Function<T, U> func) {
+            return new Failure<>(this.exception);
+        }
+
+        @Override
+        public <U> Try<U> flatMap(Function<T, Try<U>> func) {
+            return new Failure<>(this.exception);
+        }
+    }
+}

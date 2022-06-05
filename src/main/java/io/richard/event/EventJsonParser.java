@@ -2,6 +2,7 @@ package io.richard.event;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.richard.event.annotations.Event;
 import jakarta.inject.Singleton;
 import java.io.IOException;
 
