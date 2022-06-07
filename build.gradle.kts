@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     implementation(project(":annotations"))
+    implementation(project(":event-common"))
     implementation(project(":event-annotation-processor"))
     annotationProcessor(project(":event-annotation-processor"))
 

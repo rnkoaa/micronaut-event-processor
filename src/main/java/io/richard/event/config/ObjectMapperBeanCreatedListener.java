@@ -10,6 +10,7 @@ import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.micronaut.context.event.BeanCreatedEvent;
 import io.micronaut.context.event.BeanCreatedEventListener;
+import io.richard.common.jackson.EventRecordModule;
 import jakarta.inject.Singleton;
 
 @Singleton
@@ -28,7 +29,7 @@ public class ObjectMapperBeanCreatedListener implements BeanCreatedEventListener
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.registerModule(new Jdk8Module());
-//        objectMapper.registerModule(new EventMessageModule());
+        objectMapper.registerModule(new EventRecordModule());
         return objectMapper;
     }
 }
