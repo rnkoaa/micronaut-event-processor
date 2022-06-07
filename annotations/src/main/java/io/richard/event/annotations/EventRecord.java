@@ -61,4 +61,9 @@ public record EventRecord(
     public <T> T getTypedData(Class<T> typedClass) {
         return typedClass.cast(data);
     }
+
+    public <T> Event<T> getEvent(Class<T> typedClass) {
+        //add other details here for the event
+        return new Event<>(typedClass.cast(data));
+    }
 }
