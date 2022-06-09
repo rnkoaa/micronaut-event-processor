@@ -12,6 +12,7 @@ import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventRecord;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class EventRecordDeserializer extends JsonDeserializer<EventRecord> {
@@ -64,7 +65,7 @@ public class EventRecordDeserializer extends JsonDeserializer<EventRecord> {
         Object eventObject =  objectMapper.treeToValue(dataJsonNode, eventClass);
 
         return new EventRecord(UUID.fromString(eventId), eventSource, eventType, eventTimestamp,simpleType,
-            eventMetadata, eventClass, rawData, eventObject);
+            eventMetadata, eventClass, rawData, eventObject, new HashMap<>());
     }
 
     boolean isNullOrEmpty(String value) {

@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.richard.common.jackson.EventRecordModule;
+import io.richard.event.annotations.Event;
 import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventRecord;
 import java.util.UUID;
@@ -59,6 +60,9 @@ class ProductTest {
 
         Product product = eventRecord.getTypedData(Product.class);
         System.out.println(product);
+
+        Event<Product> event = eventRecord.getEvent(Product.class);
+        System.out.println(event);
     }
 
     private static ObjectMapper objectMapper() {

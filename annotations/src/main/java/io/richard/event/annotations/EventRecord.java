@@ -3,6 +3,8 @@ package io.richard.event.annotations;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -22,11 +24,14 @@ public record EventRecord(
     @JsonIgnore
     byte[] rawMessage,
 
-    Object data
+    Object data,
+
+    Map<String, Object> headers
 ) {
 
     public EventRecord {
         Objects.requireNonNull(data);
+        Objects.requireNonNull(headers);
 
         if (timestamp == null) {
             timestamp = Instant.now();
@@ -42,20 +47,28 @@ public record EventRecord(
     private EventRecord(Object data) {
         this(UUID.randomUUID(), System.getenv("USER"), data.getClass().getCanonicalName(), Instant.now(),
             data.getClass().getSimpleName(), new EventMetadata(), data.getClass(),
-            null, data);
+            null, data, new HashMap<>());
     }
+
     public EventRecord(UUID id, String source, Object data, EventMetadata metadata) {
         this(id, source, data.getClass().getCanonicalName(), Instant.now(),
             data.getClass().getSimpleName(), metadata, data.getClass(),
-            null, data);
+            null, data, new HashMap<>());
     }
 
     public EventRecord withRawMessage(byte[] rawMessage) {
-        return new EventRecord(id, source, type, timestamp, simpleClassName, metadata, eventClass, rawMessage, data);
+        return new EventRecord(id, source, type, timestamp, simpleClassName, metadata, eventClass, rawMessage, data,
+            headers);
     }
 
     public EventRecord withData(Object data) {
-        return new EventRecord(id, source, type, timestamp, simpleClassName, metadata, eventClass, rawMessage, data);
+        return new EventRecord(id, source, type, timestamp, simpleClassName, metadata, eventClass, rawMessage, data,
+            headers);
+    }
+
+    public EventRecord withHeaders(Map<String, Object> headers) {
+        return new EventRecord(id, source, type, timestamp, simpleClassName, metadata, eventClass, rawMessage, data,
+            headers);
     }
 
     public <T> T getTypedData(Class<T> typedClass) {
@@ -64,6 +77,9 @@ public record EventRecord(
 
     public <T> Event<T> getEvent(Class<T> typedClass) {
         //add other details here for the event
-        return new Event<>(typedClass.cast(data));
+        UUID partitionKey = (UUID) headers.getOrDefault("partitionKey", UUID.randomUUID());
+        String messageKey = (String) headers.getOrDefault("messageKey", "");
+        var event = new Event<>(id, timestamp, partitionKey, messageKey, typedClass.cast(data));
+        return event.withCorrelationId(metadata.correlationId());
     }
 }
