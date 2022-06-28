@@ -2,6 +2,7 @@ package io.richard.event.annotations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,5 +82,22 @@ public record EventRecord(
         String messageKey = (String) headers.getOrDefault("messageKey", "");
         var event = new Event<>(id, timestamp, partitionKey, messageKey, typedClass.cast(data));
         return event.withCorrelationId(metadata.correlationId());
+    }
+
+    public EventRecord copy() {
+        var headerCopy = new HashMap<>(headers);
+
+        return new EventRecord(
+            id,
+            source,
+            type,
+            timestamp,
+            simpleClassName,
+            metadata.copy(),
+            eventClass,
+            rawMessage,
+            data,
+            headerCopy
+        );
     }
 }

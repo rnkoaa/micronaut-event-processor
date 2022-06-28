@@ -7,15 +7,18 @@ import io.richard.event.annotations.Event;
 import io.richard.event.annotations.EventProcessorGroup;
 import io.richard.event.annotations.EventRecord;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.header.Header;
 
-@KafkaListener(groupId = "product-event-consumer-01")
+@KafkaListener(groupId = "${product.stream.groupId}")
 public class ProductEventKafkaListener {
 
     private final EventProcessorGroup eventProcessorGroup;
@@ -27,8 +30,7 @@ public class ProductEventKafkaListener {
         this.objectMapper = objectMapper;
     }
 
-    @Topic("product-stream")
-    @SuppressWarnings("unchecked")
+    @Topic("${product.stream.topic}")
     void consumeEvents(ConsumerRecord<String, byte[]> consumerRecord,
         Consumer<String, byte[]> kafkaConsumer) throws IOException, ClassNotFoundException {
         byte[] value = consumerRecord.value();
@@ -55,10 +57,10 @@ public class ProductEventKafkaListener {
         var finalEventRecord = eventRecord.withHeaders(headers);
         Event<?> event = finalEventRecord.getEvent(eventRecord.eventClass());
         eventProcessorGroup.processEvent(event);
-//
-//        kafkaConsumer.commitSync(Collections.singletonMap(
-//            new TopicPartition(consumerRecord.topic(), consumerRecord.partition()),
-//            new OffsetAndMetadata(consumerRecord.offset() + 1, "my metadata")
-//        ));
+
+        kafkaConsumer.commitSync(Collections.singletonMap(
+            new TopicPartition(consumerRecord.topic(), consumerRecord.partition()),
+            new OffsetAndMetadata(consumerRecord.offset() + 1, "my metadata")
+        ));
     }
 }

@@ -1,4 +1,4 @@
-package io.richard.event;
+package io.richard.event.processor;
 
 public interface EventProcessor<T> {
 

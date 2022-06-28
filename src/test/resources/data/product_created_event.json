@@ -1,6 +1,14 @@
 {
-  "type": "io.richard.event.ProductCreatedEvent",
-  "name": "ProductCreatedEvent",
+  "metadata": {
+    "correlation_id": "cf55b229-2606-4616-9b92-934e3476efd1",
+    "priority": 1,
+    "version": 1
+  },
+  "ce_type": "io.richard.event.ProductCreatedEvent",
+  "ce_source": "product-service",
+  "ce_simple_type": "ProductCreatedEvent",
+  "ce_id": "0302e4d4-d1e5-4eb9-94b5-72d9e66fae10",
+  "ce_timestamp": "2022-06-25T17:47:39.000Z",
   "data": {
     "product_id": "9bb3d5a7-30a3-4875-a9d0-13be882bb35d",
     "name": "product 1"

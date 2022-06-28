@@ -9,7 +9,14 @@
         </encoder>
     </appender>
 
+    <logger name="org.apache.kafka.clients.producer" level="off" additivity="false" />
+    <logger name="org.apache.kafka.clients.consumer" level="off" additivity="false" />
+    <logger name="org.apache.kafka.common.metrics" level="off" additivity="false" />
+    <logger name="org.apache.kafka.common.utils" level="off" additivity="false" />
+
     <root level="info">
         <appender-ref ref="STDOUT" />
     </root>
+
+
 </configuration>

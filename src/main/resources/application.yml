@@ -8,3 +8,8 @@ netty:
 kafka:
   bootstrap:
     servers: 'localhost:9092'
+
+product:
+  stream:
+    topic: product-stream
+    groupId: product-stream-group-01

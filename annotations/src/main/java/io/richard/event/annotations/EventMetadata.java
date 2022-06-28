@@ -20,4 +20,11 @@ public record EventMetadata(
     public EventMetadata() {
         this(UUID.randomUUID(), "application/json", null, 1, 1);
     }
+    public EventMetadata(UUID correlationId) {
+        this(correlationId, "application/json", null, 1, 1);
+    }
+
+    public EventMetadata copy() {
+        return new EventMetadata(correlationId, contentType, parentEventId, priority, version);
+    }
 }

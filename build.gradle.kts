@@ -24,6 +24,11 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     implementation("io.micronaut:micronaut-validation")
     testImplementation("org.assertj:assertj-core:3.23.1")
+
+    testImplementation("org.awaitility:awaitility:4.2.0")
+    testImplementation("org.testcontainers:testcontainers:1.17.2")
+    testImplementation("org.testcontainers:junit-jupiter:1.17.2")
+    testImplementation("org.testcontainers:kafka:1.17.2")
 }
 
 application {
