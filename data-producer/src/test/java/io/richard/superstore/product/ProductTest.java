@@ -61,8 +61,6 @@ class ProductTest {
         Product product = eventRecord.getTypedData(Product.class);
         System.out.println(product);
 
-        Event<Product> event = eventRecord.getEvent(Product.class);
-        System.out.println(event);
     }
 
     private static ObjectMapper objectMapper() {

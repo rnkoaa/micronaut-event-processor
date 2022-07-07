@@ -6,17 +6,17 @@ import io.micronaut.configuration.kafka.annotation.Topic;
 import io.richard.event.annotations.Event;
 import io.richard.event.annotations.EventProcessorGroup;
 import io.richard.event.annotations.EventRecord;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.UUID;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.header.Header;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 @KafkaListener(groupId = "${product.stream.groupId}")
 public class ProductEventKafkaListener {
@@ -32,26 +32,26 @@ public class ProductEventKafkaListener {
 
     @Topic("${product.stream.topic}")
     void consumeEvents(ConsumerRecord<String, byte[]> consumerRecord,
-        Consumer<String, byte[]> kafkaConsumer) throws IOException, ClassNotFoundException {
+                       Consumer<String, byte[]> kafkaConsumer) throws IOException, ClassNotFoundException {
         byte[] value = consumerRecord.value();
 
         Map<String, Object> headers = new HashMap<>();
         EventRecord eventRecord = objectMapper.readValue(value, EventRecord.class);
         for (Header next : consumerRecord.headers()) {
-            if (next.key().equals("traceId")) {
-                headers.put("traceId", new String(next.value()));
+            if (next.key().equals("ce-trace-id")) {
+                headers.put("ce-trace-id", new String(next.value()));
             }
-            if (next.key().equals("correlationId")) {
-                headers.put("correlationId", new String(next.value()));
+            if (next.key().equals("correlation-id")) {
+                headers.put("correlation-id", new String(next.value()));
             }
         }
 
-        if(!headers.containsKey("traceId")) {
-            headers.put("traceId", UUID.randomUUID().toString());
+        if (!headers.containsKey("ce-trace-id")) {
+            headers.put("ce-trace-id", UUID.randomUUID().toString());
         }
 
-        if(!headers.containsKey("correlationId")) {
-            headers.put("correlationId", UUID.randomUUID().toString());
+        if (!headers.containsKey("correlation-id")) {
+            headers.put("correlation-id", UUID.randomUUID().toString());
         }
 
         var finalEventRecord = eventRecord.withHeaders(headers);

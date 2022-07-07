@@ -11,7 +11,7 @@ kafka:
 
 product:
   stream:
-    topic: product-stream
+    topic: product-stream-test
     groupId: product-stream-group-01
 
 application:

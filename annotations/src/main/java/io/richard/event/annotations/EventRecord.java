@@ -100,4 +100,9 @@ public record EventRecord(
             headerCopy
         );
     }
+
+    public EventRecord withMetadata(EventMetadata eventMetadata) {
+        return new EventRecord(id, source, type, timestamp, simpleClassName, eventMetadata, eventClass, rawMessage, data,
+            headers);
+    }
 }

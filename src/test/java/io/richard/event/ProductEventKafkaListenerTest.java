@@ -6,28 +6,23 @@ import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.core.io.ResourceLoader;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.richard.event.annotations.EventMetadata;
+import io.richard.event.annotations.EventProcessorGroup;
 import io.richard.event.annotations.EventRecord;
 import jakarta.inject.Inject;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.common.header.Header;
-import org.apache.kafka.common.header.Headers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -74,7 +69,6 @@ class ProductEventKafkaListenerTest {
         assertThat(received.size()).isEqualTo(1);
 
         ConsumerRecord<String, byte[]> consumerRecord = received.iterator().next();
-        System.out.println("Partition: " + consumerRecord.partition());
         assertThat(consumerRecord).isNotNull();
 
 //        Headers headers = consumerRecord.headers();
@@ -107,33 +101,29 @@ class ProductEventKafkaListenerTest {
 
         eventRecordPublisher.publish(TOPIC, productId, productCreatedEventRecord);
         eventRecordPublisher.publish(TOPIC, productId, productUpdatedEventRecord);
-//
+
         await().atMost(5, SECONDS).until(() -> !received.isEmpty());
         assertThat(received.size()).isEqualTo(2);
-//
+
         Iterator<ConsumerRecord<String, byte[]>> iterator = received.iterator();
         ConsumerRecord<String, byte[]> firstConsumerRecord = iterator.next();
-        System.out.println("Partition: " + firstConsumerRecord.partition());
         assertThat(firstConsumerRecord).isNotNull();
 
         ConsumerRecord<String, byte[]> secondConsumerRecord = iterator.next();
-        System.out.println("Partition: " + secondConsumerRecord.partition());
         assertThat(secondConsumerRecord).isNotNull();
 
         assertThat(firstConsumerRecord.partition()).isEqualTo(secondConsumerRecord.partition());
-//
+
         EventRecord firstConsumedRecord = objectMapper.readValue(firstConsumerRecord.value(), EventRecord.class);
         assertThat(firstConsumedRecord).isNotNull();
-//
+
         Object firstData = firstConsumedRecord.getTypedData(firstConsumedRecord.eventClass());
-        System.out.println(firstData);
         assertThat(firstData.getClass()).isEqualTo(ProductCreatedEvent.class);
-//
+
         EventRecord secondConsumedRecord = objectMapper.readValue(secondConsumerRecord.value(), EventRecord.class);
         assertThat(secondConsumedRecord).isNotNull();
-//
+
         Object secondData = secondConsumedRecord.getTypedData(secondConsumedRecord.eventClass());
-        System.out.println(secondData);
         assertThat(secondData.getClass()).isEqualTo(ProductUpdatedEvent.class);
     }
 
