@@ -19,6 +19,9 @@ public record EventMetadata(
     @JsonProperty("event_timestamp")
     Instant eventTimestamp,
 
+    @JsonProperty("source_topic")
+    String sourceTopic,
+
     int priority,
     int version,
 
@@ -26,26 +29,34 @@ public record EventMetadata(
 ) {
 
     public EventMetadata() {
-        this(UUID.randomUUID(), "application/json", null, Instant.now(), 1, 1, false);
+        this(UUID.randomUUID(), "application/json", null, Instant.now(), "", 1, 1, false);
     }
 
     public EventMetadata(UUID correlationId) {
-        this(correlationId, "application/json", null, Instant.now(), 1, 1, false);
+        this(correlationId, "application/json", null, Instant.now(), "", 1, 1, false);
+    }
+
+    public EventMetadata(UUID correlationId, String sourceTopic) {
+        this(correlationId, "application/json", null, Instant.now(), sourceTopic, 1, 1, false);
     }
 
     public EventMetadata withDead(boolean dead) {
-        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, priority, version, dead);
+        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, sourceTopic, priority, version, dead);
     }
 
     public EventMetadata copy() {
-        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, priority, version, dead);
+        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, sourceTopic, priority, version, dead);
     }
 
     public EventMetadata withCorrelationId(UUID correlationId) {
-        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, priority, version, dead);
+        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, sourceTopic, priority, version, dead);
     }
 
     public EventMetadata withParentId(UUID parentEventId) {
-        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, priority, version, dead);
+        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, sourceTopic, priority, version, dead);
+    }
+
+    public EventMetadata withSourceTopic(String sourceTopic) {
+        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, sourceTopic, priority, version, dead);
     }
 }

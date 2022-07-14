@@ -5,6 +5,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.core.io.ResourceLoader;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import io.micronaut.test.support.TestPropertyProvider;
 import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventProcessorGroup;
 import io.richard.event.annotations.EventRecord;
@@ -17,9 +18,13 @@ import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.common.protocol.types.Field;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,26 +48,21 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @MicronautTest
-class DeadLetterKafkaEventListenerTest {
+class DeadLetterKafkaEventListenerTest implements TestPropertyProvider {
+    @Override
+    public Map<String, String> getProperties() {
+        return Map.of(
+//            "kafka.bootstrap.servers", kafka.getBootstrapServers()
+        );
+    }
+
+    /*static final KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.2.0"));
 
     // https://stackoverflow.com/questions/60454589/kafka-topic-unit-testing
     // https://support.huaweicloud.com/intl/en-us/devg-kafka/Kafka-java-demo.html
     @BeforeEach
     void setup() {
-//        List<String> topics = List.of(
-//            DEAD_LETTER_TOPIC,
-//            TOPIC
-//        );
-//        int partitions = 2;
-//        short replicaCount = 1;
-//        AdminClient kafkaAdminClient = KafkaAdminClient.create(Map.of(
-//            AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092"
-//        ));
-//        kafkaAdminClient.deleteTopics(topics);
-//        kafkaAdminClient.createTopics(List.of(
-//            new NewTopic(TOPIC, partitions, replicaCount),
-//            new NewTopic(DEAD_LETTER_TOPIC, partitions, replicaCount)
-//        ));
+
     }
 
     private static final String DEAD_LETTER_TOPIC = "product-stream-dead-letter";
@@ -85,6 +85,11 @@ class DeadLetterKafkaEventListenerTest {
 
     @Inject
     EventProcessorGroup eventProcessorGroup;
+
+    @BeforeAll
+    static void beforeAll(){
+        kafka.start();
+    }
 
     @Test
     void testEventWithoutProcessor() throws IOException {
@@ -114,22 +119,18 @@ class DeadLetterKafkaEventListenerTest {
     void cleanup() {
         deadLetterReceived.clear();
         received.clear();
-//
-//        List<String> topics = List.of(
-//            DEAD_LETTER_TOPIC,
-//            TOPIC
-//        );
-//        int partitions = 2;
-//        short replicaCount = 1;
-//        AdminClient kafkaAdminClient = KafkaAdminClient.create(Map.of(
-//            AdminClientConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092"
-//        ));
-//        kafkaAdminClient.deleteTopics(topics);
-//        kafkaAdminClient.
-//        kafkaAdminClient.createTopics(List.of(
-//            new NewTopic(TOPIC, partitions, replicaCount),
-//            new NewTopic(DEAD_LETTER_TOPIC, partitions, replicaCount)
-//        ));
+    }
+
+    @Override
+    public Map<String, String> getProperties() {
+        return Map.of(
+            "kafka.bootstrap.servers", kafka.getBootstrapServers()
+        );
+    }
+
+    @AfterAll
+    static void afterAll(){
+        kafka.stop();
     }
 
     @KafkaListener(offsetReset = LATEST)
@@ -161,5 +162,5 @@ class DeadLetterKafkaEventListenerTest {
 
         // Get a Sequential Stream from spliterator
         return StreamSupport.stream(spliterator, false);
-    }
+    }*/
 }

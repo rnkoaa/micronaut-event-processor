@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@KafkaListener(groupId = "${product.stream.groupId}")
+//@KafkaListener(groupId = "${product.stream.groupId}")
 public class ProductEventKafkaListener {
 
     private final EventProcessorGroup eventProcessorGroup;

@@ -6,7 +6,6 @@ import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.core.io.ResourceLoader;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.richard.event.annotations.EventMetadata;
-import io.richard.event.annotations.EventProcessorGroup;
 import io.richard.event.annotations.EventRecord;
 import jakarta.inject.Inject;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -31,10 +30,10 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@MicronautTest
+//@MicronautTest
 class ProductEventKafkaListenerTest {
 
-    @BeforeEach
+   /* @BeforeEach
     void setup() {
     }
 
@@ -130,9 +129,42 @@ class ProductEventKafkaListenerTest {
     @AfterEach
     void cleanup() {
         received.clear();
+    }*/
+
+    /*
+     override fun getProperties(): Map<String, String> {
+        return mapOf(
+            "kafka.bootstrap.servers" to kafka.bootstrapServers,
+            "app.event.topic" to orderEventTopic,
+            "app.event.dead-letter.topic" to orderDeadLetterEventTopic
+        )
     }
 
-    @KafkaListener(offsetReset = EARLIEST)
+    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @Primary
+    class DeadLetterTopicListener {
+
+        @Topic(orderDeadLetterEventTopic)
+        fun receive(eventRecord: EventRecord) {
+            deadLetterReceived.add(eventRecord)
+        }
+
+    }
+
+    @Primary
+    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+    @Replaces(EventRecordProcessor::class)
+    class EventRecordReceiver {
+
+        //        @Topic("order-stream-test")
+        @Topic(orderEventTopic)
+        fun receive(eventRecord: EventRecord) {
+            println("Got Message $eventRecord")
+            eventRecordReceived.add(eventRecord)
+        }
+    }
+     */
+   /* @KafkaListener(offsetReset = EARLIEST)
     static class EventRecordListener {
 
         @Topic(TOPIC)
@@ -151,5 +183,5 @@ class ProductEventKafkaListenerTest {
 
         // Get a Sequential Stream from spliterator
         return StreamSupport.stream(spliterator, false);
-    }
+    }*/
 }
