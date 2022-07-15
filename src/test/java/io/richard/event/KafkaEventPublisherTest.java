@@ -106,7 +106,7 @@ class KafkaEventPublisherTest implements TestPropertyProvider {
     }
 
     @KafkaListener(offsetReset = OffsetReset.EARLIEST)
-    @Primary
+//    @Primary
     static class EventRecordListener {
 
         @Topic(ORDER_STREAM_TOPIC)

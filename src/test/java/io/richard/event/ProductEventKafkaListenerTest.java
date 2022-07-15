@@ -24,8 +24,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.testcontainers.containers.KafkaContainer.KAFKA_PORT;
 
 @Testcontainers
-@MicronautTest(environments = "kafka")
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@MicronautTest(environments = {"kafka", "test"})
+//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProductEventKafkaListenerTest implements TestPropertyProvider {
     private static final String KAFKA_DOCKER_IMAGE = "confluentinc/cp-kafka:7.2.0";
     private static final String ORDER_STREAM_TOPIC = "product-stream-test";
