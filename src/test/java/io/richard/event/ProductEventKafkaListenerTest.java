@@ -1,37 +1,81 @@
 package io.richard.event;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micronaut.configuration.kafka.annotation.KafkaListener;
-import io.micronaut.configuration.kafka.annotation.Topic;
-import io.micronaut.core.io.ResourceLoader;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
+import io.micronaut.test.support.TestPropertyProvider;
+import io.richard.event.annotations.Event;
 import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventRecord;
 import jakarta.inject.Inject;
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import java.util.concurrent.TimeUnit;
 
-import static io.micronaut.configuration.kafka.annotation.OffsetReset.EARLIEST;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.awaitility.Awaitility.await;
+import static org.testcontainers.containers.KafkaContainer.KAFKA_PORT;
 
-//@MicronautTest
-class ProductEventKafkaListenerTest {
+@Testcontainers
+@MicronautTest(environments = "kafka")
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class ProductEventKafkaListenerTest implements TestPropertyProvider {
+    private static final String KAFKA_DOCKER_IMAGE = "confluentinc/cp-kafka:7.2.0";
+    private static final String ORDER_STREAM_TOPIC = "product-stream-test";
+    private static final String APP_EVENT_DEAD_LETTER = "app-event-dead-letter";
+
+    @Container
+    private static final KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse(KAFKA_DOCKER_IMAGE));
+
+    @Inject
+    private KafkaEventPublisher kafkaEventPublisher;
+
+    @Inject
+    private EventRecordCollector eventRecordCollector;
+
+    @Inject
+    private ProductEventKafkaListener productEventKafkaListener;
+
+//    private static final Collection<EventRecord> eventRecordReceiver = new ConcurrentLinkedDeque<>();
+//    private static final Collection<EventRecord> deadLetterEventRecordReceiver = new ConcurrentLinkedDeque<>();
+
+    @Override
+    public @NotNull Map<String, String> getProperties() {
+        return Map.of(
+            "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
+            "product.stream.topic", ORDER_STREAM_TOPIC,
+            "app.event.dead-letter", APP_EVENT_DEAD_LETTER
+        );
+    }
+
+
+    @Test
+    void canProductConsumerRecord() throws IOException {
+        var correlationId = UUID.randomUUID();
+        var productId = UUID.randomUUID();
+        String productName = "Diaper - Size 4";
+        var eventMetadata = new EventMetadata(correlationId, ORDER_STREAM_TOPIC);
+        var productCreatedEvent = new ProductCreatedEvent(productId, productName);
+        var eventRecord = new EventRecord(UUID.randomUUID(), "test-source", productCreatedEvent, eventMetadata);
+        kafkaEventPublisher.publish(ORDER_STREAM_TOPIC, productId, eventRecord);
+
+        Awaitility.await()
+            .atMost(15, TimeUnit.SECONDS)
+            .until(() -> eventRecordCollector.size() > 0);
+
+        EventRecord receivedRecord = eventRecordCollector.next();
+
+        Event<?> event = receivedRecord.getEvent(receivedRecord.eventClass());
+        Object data = event.getData();
+        assertThat(data.getClass()).isEqualTo(ProductCreatedEvent.class);
+    }
 
    /* @BeforeEach
     void setup() {
@@ -53,38 +97,6 @@ class ProductEventKafkaListenerTest {
     @Inject
     ResourceLoader resourceLoader;
 
-    @Test
-    void canProductConsumerRecord() throws IOException {
-        String path = "data/product_created_event.json";
-        Optional<InputStream> resourceAsStream = resourceLoader.getResourceAsStream(path);
-        assertThat(resourceAsStream).isPresent();
-
-        byte[] bytes = resourceAsStream.get().readAllBytes();
-
-        EventRecord eventRecord = objectMapper.readValue(bytes, EventRecord.class);
-        eventRecordPublisher.publish(TOPIC, eventRecord.id(), eventRecord);
-
-        await().atMost(5, SECONDS).until(() -> !received.isEmpty());
-        assertThat(received.size()).isEqualTo(1);
-
-        ConsumerRecord<String, byte[]> consumerRecord = received.iterator().next();
-        assertThat(consumerRecord).isNotNull();
-
-//        Headers headers = consumerRecord.headers();
-//        List<String> headersForKey = List.of("ce-source",
-//            "ce-type", "ce-timestamp", "ce-id", "ce-trace-id", "ce-correlation-id");
-//        Map<String, String> messageHeaders = streamFromIterator(headers.iterator())
-//            .filter(it -> headersForKey.contains(it.key()))
-//            .collect(Collectors.toMap(Header::key, it -> new String(it.value(), StandardCharsets.UTF_8)));
-
-        EventRecord deserializedValue = objectMapper.readValue(consumerRecord.value(), EventRecord.class);
-
-        assertThat(deserializedValue).isNotNull();
-
-        Object typedData = deserializedValue.getTypedData(eventRecord.eventClass());
-        System.out.println(typedData);
-        assertThat(typedData.getClass()).isEqualTo(ProductCreatedEvent.class);
-    }
 
     @Test
     void twoEventsWithSamePartitionKeyShouldBeConsumedConsecutively() throws IOException {

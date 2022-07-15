@@ -14,7 +14,7 @@ product:
     topic: product-stream
     groupId: product-stream-group-01
 
-application:
+app:
   event:
-    dead-letter-topic: "product-stream-dead-letter"
+    dead-letter: "product-stream-dead-letter"
     should-dead-letter-unhandled: true
