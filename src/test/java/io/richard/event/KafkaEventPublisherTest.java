@@ -39,13 +39,11 @@ class KafkaEventPublisherTest implements TestPropertyProvider {
     @Container
     private static final KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse(KAFKA_DOCKER_IMAGE));
 
-//    @Inject
-//    private ProductEventKafkaListener productEventKafkaListener;
-
     @Inject
     private KafkaEventPublisher kafkaEventPublisher;
 
     private static final Collection<EventRecord> eventRecordReceiver = new ConcurrentLinkedDeque<>();
+    private static final Collection<EventRecord> deadLetterEventRecordReceiver = new ConcurrentLinkedDeque<>();
 
     @Test
     void assertKafkaIsRunning() {
@@ -73,21 +71,31 @@ class KafkaEventPublisherTest implements TestPropertyProvider {
         assertThat(data.getClass()).isEqualTo(ProductCreatedEvent.class);
     }
 
-    @AfterEach
-    void afterEach(){
-        eventRecordReceiver.clear();
+    @Test
+    void deadLetterEventsWillBeReadOnDeadLetterTopic() {
+        var correlationId = UUID.randomUUID();
+        var productId = UUID.randomUUID();
+        String productName = "Diaper - Size 4";
+        var eventMetadata = new EventMetadata(correlationId, ORDER_STREAM_TOPIC);
+        var productCreatedEvent = new ProductCreatedEvent(productId, productName);
+        var eventRecord = new EventRecord(UUID.randomUUID(), "test-source", productCreatedEvent, eventMetadata);
+        kafkaEventPublisher.publish(ORDER_STREAM_DEAD_LETTER_TOPIC, productId, eventRecord);
+
+        Awaitility.await()
+            .atMost(5, TimeUnit.SECONDS)
+            .until(() -> deadLetterEventRecordReceiver.size() > 0);
+
+        EventRecord receivedRecord = deadLetterEventRecordReceiver.iterator().next();
+
+        Event<?> event = receivedRecord.getEvent(receivedRecord.eventClass());
+        Object data = event.getData();
+        assertThat(data.getClass()).isEqualTo(ProductCreatedEvent.class);
     }
 
-//    @BeforeAll
-//    static void beforeAll() {
-//        kafkaContainer.start();
-//    }
-//
-//    @AfterAll
-//    static void afterAll() {
-//        eventRecordReceiver.clear();
-//        kafkaContainer.stop();
-//    }
+    @AfterEach
+    void afterEach() {
+        eventRecordReceiver.clear();
+    }
 
     @Override
     public @NotNull Map<String, String> getProperties() {
@@ -99,12 +107,16 @@ class KafkaEventPublisherTest implements TestPropertyProvider {
 
     @KafkaListener(offsetReset = OffsetReset.EARLIEST)
     @Primary
-//    @Replaces(ProductEventKafkaListener.class)
     static class EventRecordListener {
 
         @Topic(ORDER_STREAM_TOPIC)
         void receive(EventRecord eventRecord) {
             eventRecordReceiver.add(eventRecord);
+        }
+
+        @Topic(ORDER_STREAM_DEAD_LETTER_TOPIC)
+        void receiveDeadLetter(EventRecord eventRecord) {
+            deadLetterEventRecordReceiver.add(eventRecord);
         }
     }
 }
