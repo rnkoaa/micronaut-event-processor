@@ -13,9 +13,21 @@ import java.util.UUID;
 @KafkaClient
 public interface KafkaEventPublisher {
 
-    void publish(@Topic String topic, @KafkaKey UUID partitionKey, EventRecord eventRecord);
+    @Topic("${product.stream.topic}")
+    void publish(@KafkaKey UUID partitionKey, EventRecord eventRecord);
 
-    void publish(@Topic String topic, @KafkaKey UUID partitionKey, Headers headers, EventRecord eventRecord);
+    @Topic("${product.stream.dead-letter.topic}")
+    void publishDeadLetter(@KafkaKey UUID partitionKey, EventRecord eventRecord);
 
-    void publish(@Topic String topic, @KafkaKey UUID partitionKey, Collection<Header> headers, EventRecord eventRecord);
+    @Topic("${product.stream.topic}")
+    void publish(@KafkaKey UUID partitionKey, Headers headers, EventRecord eventRecord);
+
+    @Topic("${product.stream.dead-letter.topic}")
+    void publishDeadLetter(@KafkaKey UUID partitionKey, Headers headers, EventRecord eventRecord);
+
+    @Topic("${product.stream.topic}")
+    void publish(@KafkaKey UUID partitionKey, Collection<Header> headers, EventRecord eventRecord);
+
+    @Topic("${product.stream.dead-letter.topic}")
+    void publishDeadLetter(@KafkaKey UUID partitionKey, Collection<Header> headers, EventRecord eventRecord);
 }

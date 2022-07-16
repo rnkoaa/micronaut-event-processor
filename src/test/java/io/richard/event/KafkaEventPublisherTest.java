@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @Testcontainers
-@MicronautTest(environments = "kafka")
+@MicronautTest(environments = "kafka", rebuildContext = true)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class KafkaEventPublisherTest implements TestPropertyProvider {
     private static final String KAFKA_DOCKER_IMAGE = "confluentinc/cp-kafka:7.2.0";
@@ -58,7 +58,7 @@ class KafkaEventPublisherTest implements TestPropertyProvider {
         var eventMetadata = new EventMetadata(correlationId, ORDER_STREAM_TOPIC);
         var productCreatedEvent = new ProductCreatedEvent(productId, productName);
         var eventRecord = new EventRecord(UUID.randomUUID(), "test-source", productCreatedEvent, eventMetadata);
-        kafkaEventPublisher.publish(ORDER_STREAM_TOPIC, productId, eventRecord);
+        kafkaEventPublisher.publish(productId, eventRecord);
 
         Awaitility.await()
             .atMost(5, TimeUnit.SECONDS)
@@ -79,7 +79,8 @@ class KafkaEventPublisherTest implements TestPropertyProvider {
         var eventMetadata = new EventMetadata(correlationId, ORDER_STREAM_TOPIC);
         var productCreatedEvent = new ProductCreatedEvent(productId, productName);
         var eventRecord = new EventRecord(UUID.randomUUID(), "test-source", productCreatedEvent, eventMetadata);
-        kafkaEventPublisher.publish(ORDER_STREAM_DEAD_LETTER_TOPIC, productId, eventRecord);
+
+        kafkaEventPublisher.publish( productId, eventRecord);
 
         Awaitility.await()
             .atMost(5, TimeUnit.SECONDS)

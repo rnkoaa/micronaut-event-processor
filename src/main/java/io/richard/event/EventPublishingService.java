@@ -50,11 +50,11 @@ public class EventPublishingService {
         }
 
         UUID publishingKey = (partitionKey != null) ? partitionKey : UUID.randomUUID();
-        if(event instanceof WithPartition partionable && Strings.isNotNullAndEmpty(partionable.getPartitionKey())){
+        if (event instanceof WithPartition partionable && Strings.isNotNullAndEmpty(partionable.getPartitionKey())) {
             publishingKey = UUID.nameUUIDFromBytes(partionable.getPartitionKey().getBytes());
         }
 
-        kafkaEventPublisher.publish(publishingTopic, publishingKey, headers, eventRecord);
+        kafkaEventPublisher.publish(publishingKey, headers, eventRecord);
     }
 
     private RecordHeader uuidHeader(String key, UUID value) {

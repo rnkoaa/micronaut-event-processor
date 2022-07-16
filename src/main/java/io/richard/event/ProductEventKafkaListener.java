@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.KafkaPartitionKey;
+import io.micronaut.configuration.kafka.annotation.OffsetReset;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.richard.event.annotations.Event;
 import io.richard.event.annotations.EventProcessorGroup;
@@ -22,7 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@KafkaListener(groupId = "${product.stream.groupId}")
+@KafkaListener(groupId = "${product.stream.groupId}", offsetReset = OffsetReset.EARLIEST)
 public class ProductEventKafkaListener {
     private final EventRecordCollector eventRecordCollector;
     private static final Logger LOGGER = LoggerFactory.getLogger(ProductEventKafkaListener.class);
