@@ -24,7 +24,7 @@ public record EventMetadata(
 
     int priority,
     int version,
-
+    RetryPolicy retry,
     boolean dead
 ) {
 
@@ -41,34 +41,47 @@ public record EventMetadata(
     }
 
     public EventMetadata() {
-        this(UUID.randomUUID(), "application/json", null, Instant.now(), "", 1, 1, false);
+        this(UUID.randomUUID(), "application/json", null, Instant.now(), "", 1, 1, null, false);
     }
 
     public EventMetadata(UUID correlationId) {
-        this(correlationId, "application/json", null, Instant.now(), "", 1, 1, false);
+        this(correlationId, "application/json", null, Instant.now(), "", 1, 1, null, false);
     }
 
     public EventMetadata(UUID correlationId, String sourceTopic) {
-        this(correlationId, "application/json", null, Instant.now(), sourceTopic, 1, 1, false);
+        this(correlationId, "application/json", null, Instant.now(), sourceTopic, 1, 1, null, false);
     }
 
     public EventMetadata withDead(boolean dead) {
-        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, sourceTopic, priority, version, dead);
+        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, sourceTopic, priority, version, retry, dead);
     }
 
     public EventMetadata copy() {
-        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, sourceTopic, priority, version, dead);
+        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, sourceTopic,
+            priority, version, retry, dead);
     }
 
     public EventMetadata withCorrelationId(UUID correlationId) {
-        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, sourceTopic, priority, version, dead);
+        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, sourceTopic, priority, version, retry, dead);
     }
 
     public EventMetadata withParentId(UUID parentEventId) {
-        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, sourceTopic, priority, version, dead);
+        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, sourceTopic, priority, version, retry,
+            dead);
     }
 
     public EventMetadata withSourceTopic(String sourceTopic) {
-        return new EventMetadata(correlationId, contentType, parentEventId, eventTimestamp, sourceTopic, priority, version, dead);
+        return new EventMetadata(correlationId,
+            contentType,
+            parentEventId, eventTimestamp, sourceTopic, priority, version, retry,
+            dead);
+    }
+
+    public EventMetadata withRetry(RetryPolicy retry) {
+        return new EventMetadata(correlationId,
+            contentType,
+            parentEventId,
+            eventTimestamp, sourceTopic, priority, version, retry,
+            dead);
     }
 }

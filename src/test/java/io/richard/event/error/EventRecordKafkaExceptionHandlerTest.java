@@ -42,8 +42,8 @@ class EventRecordKafkaExceptionHandlerTest extends AbstractKafkaTest {
     protected Map<String, String> additionalProperties() {
         return Map.of(
             "app.event.topic", ORDER_STREAM_TOPIC,
-            "app.event.dead-letter", APP_EVENT_DEAD_LETTER,
-            "app.error.topic", APP_ERROR_TOPIC
+            "app.event.dead-letter.topic", APP_EVENT_DEAD_LETTER,
+            "app.event.error.topic", APP_ERROR_TOPIC
         );
     }
 

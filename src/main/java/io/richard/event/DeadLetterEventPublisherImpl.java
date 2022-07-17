@@ -20,12 +20,13 @@ public class DeadLetterEventPublisherImpl implements DeadLetterEventPublisher {
     public <T> void handle(Event<T> event) {
         var deadEventMetadata = new EventMetadata().withDead(true)
             .withCorrelationId(event.getCorrelationId());
-        var eventRecord = new EventRecord(event.getId(), "product-service", event, deadEventMetadata);
+        var eventRecord = new EventRecord(event.getId(), "product-service", event.getData(), deadEventMetadata);
         kafkaEventPublisher.publishDeadLetter(event.getPartitionKey(), eventRecord);
     }
 
     @Override
     public void handle(EventRecord eventRecord) {
-        kafkaEventPublisher.publishDeadLetter(eventRecord.metadata().correlationId(), eventRecord);
+        Event<?> event = eventRecord.getEvent(eventRecord.eventClass());
+        kafkaEventPublisher.publishDeadLetter(event.getPartitionKey(), eventRecord);
     }
 }
