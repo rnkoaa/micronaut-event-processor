@@ -28,6 +28,18 @@ public record EventMetadata(
     boolean dead
 ) {
 
+    public EventMetadata {
+        if (sourceTopic == null) {
+            sourceTopic = "";
+        }
+        if (correlationId == null) {
+            correlationId = UUID.randomUUID();
+        }
+        if (contentType == null) {
+            contentType = "application/json";
+        }
+    }
+
     public EventMetadata() {
         this(UUID.randomUUID(), "application/json", null, Instant.now(), "", 1, 1, false);
     }

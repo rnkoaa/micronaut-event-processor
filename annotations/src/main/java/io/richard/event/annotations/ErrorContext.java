@@ -1,6 +1,7 @@
-package io.richard.event.error;
+package io.richard.event.annotations;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.richard.event.annotations.ExceptionSummary;
 
 import java.time.Instant;
 

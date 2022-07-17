@@ -7,9 +7,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.core.io.ResourceLoader;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.richard.event.annotations.Event;
+import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventRecord;
+import io.richard.event.annotations.ExceptionSummary;
 import io.richard.event.error.DeadLetterEventRecord;
-import io.richard.event.error.ErrorContext;
+import io.richard.event.annotations.ErrorContext;
 import jakarta.inject.Inject;
 
 import java.io.IOException;
@@ -23,8 +25,6 @@ import org.junit.jupiter.api.Test;
 @MicronautTest
 class EventJsonParserTest {
 
-    //    @Inject
-//    EventJsonParser eventJsonParser;
     @Inject
     ObjectMapper objectMapper;
 
@@ -39,13 +39,13 @@ class EventJsonParserTest {
 
         byte[] bytes = resourceAsStream.get().readAllBytes();
 
-//        Event<ProductCreatedEvent> event = objectMapper.readValue(bytes, EventRecord.class);
         EventRecord eventRecord = objectMapper.readValue(bytes, EventRecord.class);
-//        assertThat(event.getEventType()).isEqualTo(ProductCreatedEvent.class);
+        Event<?> event = eventRecord.getEvent(eventRecord.eventClass());
+        assertThat(event.getEventType()).isEqualTo(ProductCreatedEvent.class);
 //
-//        ProductCreatedEvent data = event.getData();
-//        assertThat(data).isEqualTo(new ProductCreatedEvent(
-//            UUID.fromString("9bb3d5a7-30a3-4875-a9d0-13be882bb35d"), "product 1"));
+        ProductCreatedEvent data = (ProductCreatedEvent) event.getData();
+        assertThat(data).isEqualTo(new ProductCreatedEvent(
+            UUID.fromString("9bb3d5a7-30a3-4875-a9d0-13be882bb35d"), "product 1"));
     }
 
     @Test
@@ -58,6 +58,26 @@ class EventJsonParserTest {
         assertThat(deadLetterEventRecord).isNotNull();
 
         System.out.println(deadLetterEventRecord);
+    }
+
+    @Test
+    void eventRecordWithExceptionCanBeParsed() throws JsonProcessingException {
+        var productCreatedEvent = new ProductCreatedEvent(UUID.randomUUID(), "Trek Bike Series 7");
+        var deadEvent = new EventMetadata().withDead(true);
+        EventRecord eventRecord = new EventRecord(UUID.randomUUID(),
+            "test", productCreatedEvent, deadEvent)
+            .withException(new ExceptionSummary("Bad serialization"));
+
+        String messageStr = objectMapper.writeValueAsString(eventRecord);
+        assertThat(messageStr).isNotEmpty();
+        System.out.println(messageStr);
+
+        // message can be deserialized
+        EventRecord overAndBack = objectMapper.readValue(messageStr, EventRecord.class);
+        assertThat(overAndBack).isNotNull();
+        assertThat(overAndBack.exceptionSummary()).isEqualTo(eventRecord.exceptionSummary());
+        assertThat(overAndBack.data()).isEqualTo(eventRecord.data());
+        assertThat(overAndBack.metadata()).isEqualTo(eventRecord.metadata());
     }
 
 }

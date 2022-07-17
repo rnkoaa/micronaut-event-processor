@@ -5,8 +5,11 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.OffsetReset;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.richard.event.annotations.Event;
+import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventProcessorGroup;
 import io.richard.event.annotations.EventRecord;
+import io.richard.event.annotations.ExceptionSummary;
+import io.richard.event.error.DeadLetterException;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
@@ -22,25 +25,20 @@ import java.util.UUID;
 
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
 
-@KafkaListener(
-    groupId = "${product.stream.groupId}",
-    offsetReset = OffsetReset.EARLIEST,
-    errorStrategy = @ErrorStrategy(value = RESUME_AT_NEXT_RECORD, retryDelay = "50ms", retryCount = 1)
-)
+@KafkaListener(groupId = "${product.stream.groupId}", offsetReset = OffsetReset.EARLIEST, errorStrategy = @ErrorStrategy(value = RESUME_AT_NEXT_RECORD, retryDelay = "50ms", retryCount = 1))
 public class EventRecordKafkaListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventRecordKafkaListener.class);
 
     private final EventProcessorGroup eventProcessorGroup;
+    private final KafkaEventPublisher kafkaEventPublisher;
 
-    public EventRecordKafkaListener(
-        EventProcessorGroup eventProcessorGroup
-    ) {
+    public EventRecordKafkaListener(KafkaEventPublisher kafkaEventPublisher, EventProcessorGroup eventProcessorGroup) {
         this.eventProcessorGroup = eventProcessorGroup;
+        this.kafkaEventPublisher = kafkaEventPublisher;
     }
 
     @Topic("${product.stream.topic}")
-    void consumeEvents(
-        ConsumerRecord<String, EventRecord> consumerRecord, Consumer<String, byte[]> kafkaConsumer) {
+    void consumeEvents(ConsumerRecord<String, EventRecord> consumerRecord, Consumer<String, byte[]> kafkaConsumer) {
         EventRecord eventRecord = consumerRecord.value();
         Map<String, Object> headers = new HashMap<>();
         for (Header next : consumerRecord.headers()) {
@@ -60,13 +58,21 @@ public class EventRecordKafkaListener {
             headers.put("correlation-id", UUID.randomUUID().toString());
         }
 
-        var finalEventRecord = eventRecord.withHeaders(headers);
-        Event<?> event = finalEventRecord.getEvent(eventRecord.eventClass());
-        eventProcessorGroup.processEvent(event);
+        try {
+            var finalEventRecord = eventRecord.withHeaders(headers);
+            Event<?> event = finalEventRecord.getEvent(eventRecord.eventClass());
+            eventProcessorGroup.processEvent(event);
+        } catch (DeadLetterException ex) {
+            EventMetadata metadata = eventRecord.metadata();
+            metadata = metadata.withDead(true);
+            metadata = metadata.withSourceTopic(consumerRecord.topic());
+            metadata = metadata.withCorrelationId((UUID) headers.get("correlation-id"));
 
-        kafkaConsumer.commitSync(Collections.singletonMap(
-            new TopicPartition(consumerRecord.topic(), consumerRecord.partition()),
-            new OffsetAndMetadata(consumerRecord.offset() + 1, "my metadata")
-        ));
+            eventRecord = eventRecord.withMetadata(metadata);
+            eventRecord = eventRecord.withException(new ExceptionSummary(ex));
+            kafkaEventPublisher.publishDeadLetter(eventRecord.id(), eventRecord);
+        }
+
+        kafkaConsumer.commitSync(Collections.singletonMap(new TopicPartition(consumerRecord.topic(), consumerRecord.partition()), new OffsetAndMetadata(consumerRecord.offset() + 1, "my metadata")));
     }
 }

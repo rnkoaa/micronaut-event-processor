@@ -3,14 +3,15 @@ package io.richard.common.jackson;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
-import io.richard.event.annotations.Event;
 import io.richard.event.annotations.EventRecord;
+
 import java.io.IOException;
 import java.util.UUID;
 
 public class EventRecordSerializer extends JsonSerializer<EventRecord> {
 
     public static final String EVENT_METADATA_KEY = "metadata";
+    public static final String EXCEPTION_SUMMARY_KEY = "exception_summary";
     public static final String EVENT_DATA_KEY = "data";
 
     @Override
@@ -24,6 +25,9 @@ public class EventRecordSerializer extends JsonSerializer<EventRecord> {
         gen.writeStringField("ce_timestamp", value.timestamp().toString());
         if (value.data() != null) {
             gen.writeObjectField(EVENT_DATA_KEY, value.data());
+        }
+        if (value.exceptionSummary() != null) {
+            gen.writeObjectField(EXCEPTION_SUMMARY_KEY, value.exceptionSummary());
         }
         gen.writeEndObject();
     }
