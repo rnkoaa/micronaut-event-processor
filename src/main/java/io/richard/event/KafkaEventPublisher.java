@@ -4,6 +4,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.richard.event.annotations.EventRecord;
+import io.richard.event.error.DeadLetterEventRecord;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 
@@ -30,4 +31,5 @@ public interface KafkaEventPublisher {
 
     @Topic("${product.stream.dead-letter.topic}")
     void publishDeadLetter(@KafkaKey UUID partitionKey, Collection<Header> headers, EventRecord eventRecord);
+
 }

@@ -18,3 +18,5 @@ app:
   event:
     dead-letter: "product-stream-dead-letter"
     should-dead-letter-unhandled: true
+  error:
+    topic: event-processor-error

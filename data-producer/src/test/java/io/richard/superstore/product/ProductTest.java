@@ -37,7 +37,7 @@ class ProductTest {
 
         var eventRecord = new EventRecord(UUID.fromString("6a6f4ae1-4457-45dc-9be5-6a26bccc015e"),
             "ProductTest", product, new EventMetadata(
-            UUID.fromString("f3892217-e93c-46dc-a8f6-bfc89047c852"), "", null, 1, 1
+            UUID.fromString("f3892217-e93c-46dc-a8f6-bfc89047c852"), "data-producer"
         ));
 
         String message = objectMapper.writeValueAsString(eventRecord);

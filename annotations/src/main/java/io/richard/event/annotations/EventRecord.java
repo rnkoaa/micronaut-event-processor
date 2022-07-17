@@ -2,6 +2,7 @@ package io.richard.event.annotations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -25,6 +26,7 @@ public record EventRecord(
     @JsonIgnore
     byte[] rawMessage,
 
+    @Nonnull
     Object data,
 
     Map<String, Object> headers

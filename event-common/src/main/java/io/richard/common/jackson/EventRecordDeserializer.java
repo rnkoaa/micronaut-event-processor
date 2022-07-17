@@ -23,7 +23,6 @@ public class EventRecordDeserializer extends JsonDeserializer<EventRecord> {
         ObjectMapper objectMapper = (ObjectMapper) jp.getCodec();
         JsonNode node = objectMapper.readTree(jp);
         byte[] rawData = objectMapper.writeValueAsBytes(jp);
-//        objectMapper.writeValueAsBytes(jp.)
         TreeNode metadata = node.get(EVENT_METADATA_KEY);
         if (metadata == null) {
             throw new IllegalStateException("metadata object required to be deserialized");
@@ -59,7 +58,7 @@ public class EventRecordDeserializer extends JsonDeserializer<EventRecord> {
 
         JsonNode dataJsonNode = node.get("data");
         if(dataJsonNode == null) {
-            throw new RuntimeException("no data node to process event");
+            throw new IllegalStateException("no data node to process event");
         }
 
         Object eventObject =  objectMapper.treeToValue(dataJsonNode, eventClass);

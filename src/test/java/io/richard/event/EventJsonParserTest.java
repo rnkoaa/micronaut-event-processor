@@ -2,22 +2,28 @@ package io.richard.event;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.core.io.ResourceLoader;
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.richard.event.annotations.Event;
 import io.richard.event.annotations.EventRecord;
+import io.richard.event.error.DeadLetterEventRecord;
+import io.richard.event.error.ErrorContext;
 import jakarta.inject.Inject;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
 import org.junit.jupiter.api.Test;
 
 @MicronautTest
 class EventJsonParserTest {
 
-//    @Inject
+    //    @Inject
 //    EventJsonParser eventJsonParser;
     @Inject
     ObjectMapper objectMapper;
@@ -40,6 +46,18 @@ class EventJsonParserTest {
 //        ProductCreatedEvent data = event.getData();
 //        assertThat(data).isEqualTo(new ProductCreatedEvent(
 //            UUID.fromString("9bb3d5a7-30a3-4875-a9d0-13be882bb35d"), "product 1"));
+    }
+
+    @Test
+    void deadRecordSerDeTest() throws JsonProcessingException {
+        var deadRecord = new DeadLetterEventRecord(new ErrorContext("Bad Message"), Map.of());
+        String deadRecordStr = objectMapper.writeValueAsString(deadRecord);
+        System.out.println(deadRecordStr);
+
+        DeadLetterEventRecord deadLetterEventRecord = objectMapper.readValue(deadRecordStr, DeadLetterEventRecord.class);
+        assertThat(deadLetterEventRecord).isNotNull();
+
+        System.out.println(deadLetterEventRecord);
     }
 
 }
