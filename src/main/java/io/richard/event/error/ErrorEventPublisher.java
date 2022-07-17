@@ -15,6 +15,6 @@ public interface ErrorEventPublisher {
      *
      * @param deadRecord the record being published. This wraps the original message, and its metadata
      */
-    @Topic("${app.error.topic}")
+    @Topic("${app.event.error.topic}")
     void publishError(@KafkaKey UUID partitionKey, DeadLetterEventRecord deadRecord);
 }

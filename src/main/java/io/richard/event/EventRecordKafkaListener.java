@@ -9,7 +9,10 @@ import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventProcessorGroup;
 import io.richard.event.annotations.EventRecord;
 import io.richard.event.annotations.ExceptionSummary;
+import io.richard.event.annotations.RetryPolicy;
 import io.richard.event.error.DeadLetterException;
+import io.richard.event.error.RetryableException;
+import io.richard.event.processor.DeadLetterEventPublisher;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
@@ -31,15 +34,17 @@ public class EventRecordKafkaListener {
 
     private final EventProcessorGroup eventProcessorGroup;
     private final KafkaEventPublisher kafkaEventPublisher;
+    private final DeadLetterEventPublisher deadLetterEventPublisher;
 
-    public EventRecordKafkaListener(KafkaEventPublisher kafkaEventPublisher, EventProcessorGroup eventProcessorGroup) {
+    public EventRecordKafkaListener(KafkaEventPublisher kafkaEventPublisher,
+                                    DeadLetterEventPublisher deadLetterEventPublisher,
+                                    EventProcessorGroup eventProcessorGroup) {
         this.eventProcessorGroup = eventProcessorGroup;
         this.kafkaEventPublisher = kafkaEventPublisher;
+        this.deadLetterEventPublisher = deadLetterEventPublisher;
     }
 
-    @Topic("${app.event.topic}")
-    void consumeEvents(ConsumerRecord<String, EventRecord> consumerRecord, Consumer<String, byte[]> kafkaConsumer) {
-        EventRecord eventRecord = consumerRecord.value();
+    Map<String, Object> extractHeaders(ConsumerRecord<String, EventRecord> consumerRecord) {
         Map<String, Object> headers = new HashMap<>();
         UUID correlationId = UUID.randomUUID();
         for (Header next : consumerRecord.headers()) {
@@ -59,19 +64,38 @@ public class EventRecordKafkaListener {
         if (!headers.containsKey("correlation-id")) {
             headers.put("correlation-id", correlationId);
         }
+        return headers;
+    }
 
+    @Topic("${app.event.topic}")
+    void consumeEvents(ConsumerRecord<String, EventRecord> consumerRecord, Consumer<String, byte[]> kafkaConsumer) {
+        EventRecord eventRecord = consumerRecord.value();
+        Map<String, Object> headers = extractHeaders(consumerRecord);
+        UUID correlationId = (UUID) headers.getOrDefault("correlation-id", UUID.randomUUID());
         EventMetadata metadata = enrichMetadata(consumerRecord.topic(), correlationId, eventRecord.metadata());
+        var finalEventRecord = eventRecord.withHeaders(headers);
+        Event<?> event = finalEventRecord.getEvent(eventRecord.eventClass());
+        event = event.withCorrelationId(correlationId);
 
         try {
-            var finalEventRecord = eventRecord.withHeaders(headers);
-            Event<?> event = finalEventRecord.getEvent(eventRecord.eventClass());
-            event = event.withCorrelationId(correlationId);
             eventProcessorGroup.processEvent(event, metadata);
         } catch (DeadLetterException ex) {
             metadata = metadata.withDead(true);
             eventRecord = eventRecord.withMetadata(metadata);
             eventRecord = eventRecord.withException(new ExceptionSummary(ex));
-            kafkaEventPublisher.publishDeadLetter(eventRecord.id(), eventRecord);
+            deadLetterEventPublisher.handle(eventRecord);
+        } catch (Exception ex) {
+            if (ex instanceof RetryableException retryableException) {
+// send to retry topic for topic
+//                eventRecord
+                var retry = new RetryPolicy();
+                var metadataWithRetry = metadata.withRetry(retry);
+                var retryEventRecord = new EventRecord(event.getId(), "product-service", event.getData(), metadataWithRetry);
+
+                kafkaEventPublisher.publishRetry(event.getPartitionKey(), retryEventRecord);
+            } else {
+                // publish to dead letter
+            }
         }
 
         kafkaConsumer.commitSync(

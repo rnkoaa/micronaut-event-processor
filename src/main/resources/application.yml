@@ -9,7 +9,12 @@ app:
   event:
     groupId: product-stream-group-01
     topic: product-stream
-    dead-letter: "product-stream-dead-letter"
     should-dead-letter-unhandled: true
-  error:
-    topic: event-processor-error
+    dead-letter:
+      topic: "product-stream-dead-letter"
+    retry:
+      topic: product-stream-retry
+    error:
+      topic: event-processor-error
+      # all these exceptions will dead-letter
+      exceptions: UniqueConstraintException,DuplicateKeyException,IllegalArgumentException

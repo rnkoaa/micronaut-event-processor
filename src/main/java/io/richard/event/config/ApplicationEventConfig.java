@@ -2,7 +2,7 @@ package io.richard.event.config;
 
 import io.micronaut.context.annotation.ConfigurationProperties;
 
-@ConfigurationProperties("application.event")
+@ConfigurationProperties("app.event")
 public class ApplicationEventConfig {
 
     private boolean shouldDeadLetterUnhandled;

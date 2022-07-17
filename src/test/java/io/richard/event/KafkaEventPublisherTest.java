@@ -25,9 +25,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-//@Testcontainers
-//@MicronautTest(environments = "kafka", rebuildContext = true)
-//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Disabled
 class KafkaEventPublisherTest implements TestPropertyProvider {
     private static final String KAFKA_DOCKER_IMAGE = "confluentinc/cp-kafka:7.2.0";
