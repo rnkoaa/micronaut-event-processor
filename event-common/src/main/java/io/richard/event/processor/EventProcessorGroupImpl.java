@@ -1,7 +1,9 @@
 package io.richard.event.processor;
 
 import io.richard.event.annotations.Event;
+import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventProcessorGroup;
+import io.richard.event.annotations.EventRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,14 +24,20 @@ public class EventProcessorGroupImpl extends HashMap<Class<?>, Object> implement
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T> void processEvent(Event<T> event) {
+    public <T> void processEvent(Event<T> event, EventMetadata eventMetadata) {
         EventProcessor<T> eventProcessor = (EventProcessor<T>) get(event.getEventType());
         if (eventProcessor == null) {
             logger.warn("no processor found for event {}, moving on.", event.getEventType());
 
             if (eventProcessorConfig.shouldDeadLetterUnhandled()) {
-                deadLetterEventPublisher.handle(event);
+                EventRecord eventRecord = new EventRecord(
+                    event.getId(), eventMetadata.sourceTopic(), event.getType(),
+                    event.getTimestamp(), event.getName(), eventMetadata, event.getEventType(),
+                    null, event.getData(), null, null
+                );
+                deadLetterEventPublisher.handle(eventRecord);
             }
+
             return;
         }
 

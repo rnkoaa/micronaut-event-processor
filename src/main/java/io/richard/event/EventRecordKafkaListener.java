@@ -25,7 +25,7 @@ import java.util.UUID;
 
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
 
-@KafkaListener(groupId = "${product.stream.groupId}", offsetReset = OffsetReset.EARLIEST, errorStrategy = @ErrorStrategy(value = RESUME_AT_NEXT_RECORD, retryDelay = "50ms", retryCount = 1))
+@KafkaListener(groupId = "${app.event.groupId}", offsetReset = OffsetReset.EARLIEST, errorStrategy = @ErrorStrategy(value = RESUME_AT_NEXT_RECORD, retryDelay = "50ms", retryCount = 1))
 public class EventRecordKafkaListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(EventRecordKafkaListener.class);
 
@@ -37,16 +37,18 @@ public class EventRecordKafkaListener {
         this.kafkaEventPublisher = kafkaEventPublisher;
     }
 
-    @Topic("${product.stream.topic}")
+    @Topic("${app.event.topic}")
     void consumeEvents(ConsumerRecord<String, EventRecord> consumerRecord, Consumer<String, byte[]> kafkaConsumer) {
         EventRecord eventRecord = consumerRecord.value();
         Map<String, Object> headers = new HashMap<>();
+        UUID correlationId = UUID.randomUUID();
         for (Header next : consumerRecord.headers()) {
             if (next.key().equals("ce-trace-id")) {
                 headers.put("ce-trace-id", new String(next.value()));
             }
             if (next.key().equals("correlation-id")) {
-                headers.put("correlation-id", new String(next.value()));
+                correlationId = UUID.fromString(new String(next.value()));
+                headers.put("correlation-id", correlationId);
             }
         }
 
@@ -55,24 +57,31 @@ public class EventRecordKafkaListener {
         }
 
         if (!headers.containsKey("correlation-id")) {
-            headers.put("correlation-id", UUID.randomUUID().toString());
+            headers.put("correlation-id", correlationId);
         }
+
+        EventMetadata metadata = enrichMetadata(consumerRecord.topic(), correlationId, eventRecord.metadata());
 
         try {
             var finalEventRecord = eventRecord.withHeaders(headers);
             Event<?> event = finalEventRecord.getEvent(eventRecord.eventClass());
-            eventProcessorGroup.processEvent(event);
+            event = event.withCorrelationId(correlationId);
+            eventProcessorGroup.processEvent(event, metadata);
         } catch (DeadLetterException ex) {
-            EventMetadata metadata = eventRecord.metadata();
             metadata = metadata.withDead(true);
-            metadata = metadata.withSourceTopic(consumerRecord.topic());
-            metadata = metadata.withCorrelationId((UUID) headers.get("correlation-id"));
-
             eventRecord = eventRecord.withMetadata(metadata);
             eventRecord = eventRecord.withException(new ExceptionSummary(ex));
             kafkaEventPublisher.publishDeadLetter(eventRecord.id(), eventRecord);
         }
 
-        kafkaConsumer.commitSync(Collections.singletonMap(new TopicPartition(consumerRecord.topic(), consumerRecord.partition()), new OffsetAndMetadata(consumerRecord.offset() + 1, "my metadata")));
+        kafkaConsumer.commitSync(
+            Collections.singletonMap(new TopicPartition(consumerRecord.topic(), consumerRecord.partition()),
+                new OffsetAndMetadata(consumerRecord.offset() + 1, "my metadata")));
+    }
+
+    private EventMetadata enrichMetadata(String topic, UUID correlationId, EventMetadata eventMetadata) {
+        return eventMetadata.copy()
+            .withSourceTopic(topic)
+            .withCorrelationId(correlationId);
     }
 }

@@ -7,7 +7,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.OffsetReset;
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.context.annotation.Replaces;
-import io.richard.event.AbstractkafkaTest;
+import io.richard.event.AbstractKafkaTest;
 import io.richard.event.KafkaEventPublisher;
 import jakarta.inject.Inject;
 import org.junit.jupiter.api.AfterEach;
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-class EventRecordKafkaExceptionHandlerTest extends AbstractkafkaTest {
+class EventRecordKafkaExceptionHandlerTest extends AbstractKafkaTest {
     private static final String ORDER_STREAM_TOPIC = "app-product-stream-test";
     private static final String APP_EVENT_DEAD_LETTER = "app-event-dead-letter";
     private static final String APP_ERROR_TOPIC = "app-event-error-unhandled";
@@ -41,7 +41,7 @@ class EventRecordKafkaExceptionHandlerTest extends AbstractkafkaTest {
     @Override
     protected Map<String, String> additionalProperties() {
         return Map.of(
-            "product.stream.topic", ORDER_STREAM_TOPIC,
+            "app.event.topic", ORDER_STREAM_TOPIC,
             "app.event.dead-letter", APP_EVENT_DEAD_LETTER,
             "app.error.topic", APP_ERROR_TOPIC
         );

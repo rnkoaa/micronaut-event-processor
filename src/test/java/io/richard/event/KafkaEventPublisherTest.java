@@ -100,7 +100,7 @@ class KafkaEventPublisherTest implements TestPropertyProvider {
     public @NotNull Map<String, String> getProperties() {
         return Map.of(
             "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-            "product.stream.topic", "product-stream-test"
+            "app.event.topic", "product-stream-test"
         );
     }
 

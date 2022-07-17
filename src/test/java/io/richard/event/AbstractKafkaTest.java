@@ -15,7 +15,7 @@ import java.util.Map;
 @Testcontainers
 @MicronautTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public abstract class AbstractkafkaTest implements TestPropertyProvider {
+public abstract class AbstractKafkaTest implements TestPropertyProvider {
     static final String KAFKA_DOCKER_IMAGE = "confluentinc/cp-kafka:7.2.0";
 
     @Container
@@ -26,6 +26,7 @@ public abstract class AbstractkafkaTest implements TestPropertyProvider {
         var props = new HashMap<>(additionalProperties());
         props.putAll(
             Map.of(
+                "app.event.groupId", "product-stream-group-01",
                 "micronaut.application.name", "producer-test-application",
                 "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers()
             )

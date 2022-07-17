@@ -18,7 +18,6 @@ public class Event<T> {
 
     private UUID correlationId;
 
-
     @JsonIgnore
     private final String messageKey;
 
@@ -99,4 +98,9 @@ public class Event<T> {
         this.correlationId = correlationId;
         return this;
     }
+
+//    public Event<?> withMetadata(EventMetadata metadata) {
+//        new Event<?>()
+//        return this;
+//    }
 }

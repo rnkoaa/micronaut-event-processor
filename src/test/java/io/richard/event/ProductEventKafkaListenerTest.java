@@ -17,7 +17,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 import org.testcontainers.utility.DockerImageName;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +29,6 @@ class ProductEventKafkaListenerTest implements TestPropertyProvider {
     private static final String ORDER_STREAM_TOPIC = "app-product-stream-test";
     private static final String APP_EVENT_DEAD_LETTER = "app-event-dead-letter";
 
-
     @Container
     private static final KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse(KAFKA_DOCKER_IMAGE));
 
@@ -39,15 +37,12 @@ class ProductEventKafkaListenerTest implements TestPropertyProvider {
     private KafkaEventPublisher kafkaEventPublisher;
     private EventRecordCollector eventRecordCollector;
 
-//    private static Pro
-
     @BeforeAll
     static void beforeAll() {
-//        context.
         EmbeddedServer embeddedServer = ApplicationContext.run(EmbeddedServer.class, PropertySource.of("test", Map.of(
             "micronaut.application.name", "producer-test-application",
             "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-            "product.stream.topic", ORDER_STREAM_TOPIC,
+            "app.event.topic", ORDER_STREAM_TOPIC,
             "app.event.dead-letter", APP_EVENT_DEAD_LETTER
         )));
         applicationContext = embeddedServer.getApplicationContext();
@@ -60,7 +55,6 @@ class ProductEventKafkaListenerTest implements TestPropertyProvider {
         eventRecordCollector = applicationContext.getBean(EventRecordCollector.class);
     }
 
-
     @Disabled
     @Test
     void testProductEventInjected() {
@@ -70,25 +64,12 @@ class ProductEventKafkaListenerTest implements TestPropertyProvider {
         assertThat(eventRecordCollector).isNotNull();
     }
 
-//
-//    @Inject
-//    private KafkaEventPublisher kafkaEventPublisher;
-//
-//    @Inject
-//    private EventRecordCollector eventRecordCollector;
-//
-//    @Inject
-//    private ProductEventKafkaListener productEventKafkaListener;
-
-//    private static final Collection<EventRecord> eventRecordReceiver = new ConcurrentLinkedDeque<>();
-//    private static final Collection<EventRecord> deadLetterEventRecordReceiver = new ConcurrentLinkedDeque<>();
-
     @Override
     public @NotNull Map<String, String> getProperties() {
         return Map.of(
             "micronaut.application.name", "producer-test-application",
             "kafka.bootstrap.servers", kafkaContainer.getBootstrapServers(),
-            "product.stream.topic", ORDER_STREAM_TOPIC,
+            "app.event.topic", ORDER_STREAM_TOPIC,
             "app.event.dead-letter", APP_EVENT_DEAD_LETTER
         );
     }
@@ -101,7 +82,7 @@ class ProductEventKafkaListenerTest implements TestPropertyProvider {
 
     @Disabled
     @Test
-    void canProductConsumerRecord() throws IOException {
+    void canProductConsumerRecord() {
         var correlationId = UUID.randomUUID();
         var productId = UUID.randomUUID();
         String productName = "Diaper - Size 4";

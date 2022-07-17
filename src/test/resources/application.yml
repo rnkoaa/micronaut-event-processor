@@ -9,12 +9,9 @@ kafka:
   bootstrap:
     servers: 'localhost:9092'
 
-product:
-  stream:
+app:
+  event:
     topic: product-stream-test
     groupId: product-stream-group-01
-
-application:
-  event:
     dead-letter-topic: "product-stream-dead-letter"
     should-dead-letter-unhandled: true

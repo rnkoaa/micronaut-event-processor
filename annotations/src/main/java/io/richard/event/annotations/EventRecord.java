@@ -64,6 +64,12 @@ public record EventRecord(
             null, data, new HashMap<>(), null);
     }
 
+    public EventRecord(UUID id, String source, Object data) {
+        this(id, source, data.getClass().getCanonicalName(), Instant.now(),
+            data.getClass().getSimpleName(), new EventMetadata(), data.getClass(),
+            null, data, new HashMap<>(), null);
+    }
+
     public EventRecord withRawMessage(byte[] rawMessage) {
         return new EventRecord(id, source, type, timestamp, simpleClassName, metadata, eventClass, rawMessage, data,
             headers, exceptionSummary);

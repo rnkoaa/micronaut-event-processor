@@ -23,4 +23,9 @@ public class DeadLetterEventPublisherImpl implements DeadLetterEventPublisher {
         var eventRecord = new EventRecord(event.getId(), "product-service", event, deadEventMetadata);
         kafkaEventPublisher.publishDeadLetter(event.getPartitionKey(), eventRecord);
     }
+
+    @Override
+    public void handle(EventRecord eventRecord) {
+        kafkaEventPublisher.publishDeadLetter(eventRecord.metadata().correlationId(), eventRecord);
+    }
 }

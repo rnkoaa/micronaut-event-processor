@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-class EventRecordKafkaListenerTest extends AbstractkafkaTest{
+class EventRecordKafkaListenerTest extends AbstractKafkaTest {
     private static final String ORDER_STREAM_TOPIC = "app-product-stream-test";
     private static final String APP_EVENT_DEAD_LETTER = "app-event-dead-letter";
 
@@ -37,7 +37,7 @@ class EventRecordKafkaListenerTest extends AbstractkafkaTest{
     @Override
     protected Map<String, String> additionalProperties() {
         return Map.of(
-            "product.stream.topic", ORDER_STREAM_TOPIC,
+            "app.event.topic", ORDER_STREAM_TOPIC,
             "app.event.dead-letter", APP_EVENT_DEAD_LETTER
         );
     }
