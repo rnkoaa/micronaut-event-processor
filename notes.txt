@@ -1,3 +1,5 @@
+https://eng.uber.com/reliable-reprocessing/
+
 @Singleton
 @KafkaListener(groupId = "${kafka.event.group-id}")
 public class KafkaEventProcessor implements ConsumerRebalanceListener, ConsumerAware<String, byte[]>,

@@ -8,8 +8,15 @@ import jakarta.inject.Singleton;
 @KafkaEventProcessor(ProductCreatedEvent.class)
 public class ProductCreatedEventProcessor implements EventProcessor<ProductCreatedEvent> {
 
+    private final EventCollector eventCollector;
+
+    public ProductCreatedEventProcessor(EventCollector eventCollector) {
+        this.eventCollector = eventCollector;
+    }
+
     @Override
     public void process(ProductCreatedEvent event) {
         System.out.println("Processing event " + event);
+        eventCollector.add(event);
     }
 }

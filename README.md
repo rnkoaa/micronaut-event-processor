@@ -1,5 +1,10 @@
 ## Micronaut 3.5.1 Documentation
 
+### Warning
+
+This is a toy project to learn and understand resilient event processing on top of Micronaut. This 
+will never be intended for production usage.
+
 - [User Guide](https://docs.micronaut.io/3.5.1/guide/index.html)
 - [API Reference](https://docs.micronaut.io/3.5.1/api/index.html)
 - [Configuration Reference](https://docs.micronaut.io/3.5.1/guide/configurationreference.html)

@@ -1,6 +1,7 @@
 package io.richard.common.jackson;
 
 import static io.richard.common.jackson.EventRecordSerializer.EVENT_METADATA_KEY;
+import static io.richard.common.jackson.EventRecordSerializer.EXCEPTION_SUMMARY_KEY;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.TreeNode;
@@ -10,6 +11,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventRecord;
+import io.richard.event.annotations.ExceptionSummary;
+
 import java.io.IOException;
 import java.time.Instant;
 import java.util.HashMap;
@@ -23,7 +26,6 @@ public class EventRecordDeserializer extends JsonDeserializer<EventRecord> {
         ObjectMapper objectMapper = (ObjectMapper) jp.getCodec();
         JsonNode node = objectMapper.readTree(jp);
         byte[] rawData = objectMapper.writeValueAsBytes(jp);
-//        objectMapper.writeValueAsBytes(jp.)
         TreeNode metadata = node.get(EVENT_METADATA_KEY);
         if (metadata == null) {
             throw new IllegalStateException("metadata object required to be deserialized");
@@ -58,14 +60,20 @@ public class EventRecordDeserializer extends JsonDeserializer<EventRecord> {
         }
 
         JsonNode dataJsonNode = node.get("data");
-        if(dataJsonNode == null) {
-            throw new RuntimeException("no data node to process event");
+        if (dataJsonNode == null) {
+            throw new IllegalStateException("no data node to process event");
         }
 
-        Object eventObject =  objectMapper.treeToValue(dataJsonNode, eventClass);
+        Object eventObject = objectMapper.treeToValue(dataJsonNode, eventClass);
 
-        return new EventRecord(UUID.fromString(eventId), eventSource, eventType, eventTimestamp,simpleType,
-            eventMetadata, eventClass, rawData, eventObject, new HashMap<>());
+        TreeNode exceptionSummaryNode = node.get(EXCEPTION_SUMMARY_KEY);
+        ExceptionSummary exceptionSummary = null;
+        if (exceptionSummaryNode != null) {
+            exceptionSummary = objectMapper.readValue(exceptionSummaryNode.traverse(), ExceptionSummary.class);
+        }
+
+        return new EventRecord(UUID.fromString(eventId), eventSource, eventType, eventTimestamp, simpleType,
+            eventMetadata, eventClass, rawData, eventObject, new HashMap<>(), exceptionSummary);
     }
 
     boolean isNullOrEmpty(String value) {

@@ -1,0 +1,17 @@
+micronaut:
+  application:
+    name: micronautEventProcessor
+netty:
+  default:
+    allocator:
+      max-order: 3
+kafka:
+  bootstrap:
+    servers: 'localhost:9092'
+
+app:
+  event:
+    topic: product-stream-test
+    groupId: product-stream-group-01
+    dead-letter-topic: "product-stream-dead-letter"
+    should-dead-letter-unhandled: true

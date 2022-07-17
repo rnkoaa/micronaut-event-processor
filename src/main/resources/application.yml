@@ -5,11 +5,11 @@ netty:
   default:
     allocator:
       max-order: 3
-kafka:
-  bootstrap:
-    servers: 'localhost:9092'
-
-product:
-  stream:
-    topic: product-stream
+app:
+  event:
     groupId: product-stream-group-01
+    topic: product-stream
+    dead-letter: "product-stream-dead-letter"
+    should-dead-letter-unhandled: true
+  error:
+    topic: event-processor-error

@@ -29,7 +29,6 @@ public class EventPublishingService {
 //            .collect(Collectors.toMap(Header::key, it -> new String(it.value(), StandardCharsets.UTF_8)));
 
     /**
-     *
      * @param topic
      * @param partitionKey
      * @param event
@@ -39,15 +38,23 @@ public class EventPublishingService {
         var eventMetadata = new EventMetadata();
         var eventRecord = new EventRecord(UUID.randomUUID(), "source", event, eventMetadata);
 
-        UUID key = (partitionKey != null) ? partitionKey : UUID.randomUUID();
-
         // set up headers
         Collection<Header> headers = List.of(
             uuidHeader("correlation-id", eventMetadata.correlationId()),
             uuidHeader("ce-trace-id", eventMetadata.correlationId())
         );
 
-        kafkaEventPublisher.publish(topic, key, headers, eventRecord);
+        String publishingTopic = topic;
+        if (event instanceof WithTopic topical && Strings.isNotNullAndEmpty(topical.getTopic())) {
+            publishingTopic = topical.getTopic();
+        }
+
+        UUID publishingKey = (partitionKey != null) ? partitionKey : UUID.randomUUID();
+        if (event instanceof WithPartition partionable && Strings.isNotNullAndEmpty(partionable.getPartitionKey())) {
+            publishingKey = UUID.nameUUIDFromBytes(partionable.getPartitionKey().getBytes());
+        }
+
+        kafkaEventPublisher.publish(publishingKey, headers, eventRecord);
     }
 
     private RecordHeader uuidHeader(String key, UUID value) {

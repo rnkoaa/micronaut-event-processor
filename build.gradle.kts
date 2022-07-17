@@ -19,15 +19,15 @@ dependencies {
     annotationProcessor("io.micronaut:micronaut-http-validation")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
-    implementation("io.micronaut.kafka:micronaut-kafka")
+    implementation("io.micronaut.kafka:micronaut-kafka:4.3.1")
     implementation("jakarta.annotation:jakarta.annotation-api")
     runtimeOnly("ch.qos.logback:logback-classic")
     implementation("io.micronaut:micronaut-validation")
-    testImplementation("org.assertj:assertj-core:3.23.1")
 
+    testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation("org.awaitility:awaitility:4.2.0")
-    testImplementation("org.testcontainers:testcontainers:1.17.2")
-    testImplementation("org.testcontainers:junit-jupiter:1.17.2")
+    testImplementation("org.testcontainers:testcontainers:1.17.3")
+    testImplementation("org.testcontainers:junit-jupiter:1.17.3")
     testImplementation("org.testcontainers:kafka:1.17.2")
 }
 

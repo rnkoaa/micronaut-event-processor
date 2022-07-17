@@ -2,6 +2,8 @@ package io.richard.event.annotations;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -25,9 +27,14 @@ public record EventRecord(
     @JsonIgnore
     byte[] rawMessage,
 
+    @Nonnull
     Object data,
 
-    Map<String, Object> headers
+    Map<String, Object> headers,
+
+    @Nullable
+    @JsonProperty("exception_summary")
+    ExceptionSummary exceptionSummary
 ) {
 
     public EventRecord {
@@ -48,28 +55,34 @@ public record EventRecord(
     private EventRecord(Object data) {
         this(UUID.randomUUID(), System.getenv("USER"), data.getClass().getCanonicalName(), Instant.now(),
             data.getClass().getSimpleName(), new EventMetadata(), data.getClass(),
-            null, data, new HashMap<>());
+            null, data, new HashMap<>(), null);
     }
 
     public EventRecord(UUID id, String source, Object data, EventMetadata metadata) {
         this(id, source, data.getClass().getCanonicalName(), Instant.now(),
             data.getClass().getSimpleName(), metadata, data.getClass(),
-            null, data, new HashMap<>());
+            null, data, new HashMap<>(), null);
+    }
+
+    public EventRecord(UUID id, String source, Object data) {
+        this(id, source, data.getClass().getCanonicalName(), Instant.now(),
+            data.getClass().getSimpleName(), new EventMetadata(), data.getClass(),
+            null, data, new HashMap<>(), null);
     }
 
     public EventRecord withRawMessage(byte[] rawMessage) {
         return new EventRecord(id, source, type, timestamp, simpleClassName, metadata, eventClass, rawMessage, data,
-            headers);
+            headers, exceptionSummary);
     }
 
     public EventRecord withData(Object data) {
         return new EventRecord(id, source, type, timestamp, simpleClassName, metadata, eventClass, rawMessage, data,
-            headers);
+            headers, exceptionSummary);
     }
 
     public EventRecord withHeaders(Map<String, Object> headers) {
         return new EventRecord(id, source, type, timestamp, simpleClassName, metadata, eventClass, rawMessage, data,
-            headers);
+            headers, exceptionSummary);
     }
 
     public <T> T getTypedData(Class<T> typedClass) {
@@ -97,7 +110,18 @@ public record EventRecord(
             eventClass,
             rawMessage,
             data,
-            headerCopy
+            headerCopy,
+            exceptionSummary
         );
+    }
+
+    public EventRecord withMetadata(EventMetadata eventMetadata) {
+        return new EventRecord(id, source, type, timestamp, simpleClassName, eventMetadata, eventClass, rawMessage, data,
+            headers, exceptionSummary);
+    }
+
+    public EventRecord withException(ExceptionSummary exception) {
+        return new EventRecord(id, source, type, timestamp, simpleClassName, metadata, eventClass, rawMessage, data,
+            headers, exception);
     }
 }
