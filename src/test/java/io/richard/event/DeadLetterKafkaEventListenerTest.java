@@ -1,27 +1,26 @@
 package io.richard.event;
 
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.OffsetReset;
 import io.micronaut.configuration.kafka.annotation.Topic;
-import io.micronaut.test.extensions.junit5.annotation.MicronautTest;
 import io.richard.event.annotations.Event;
 import io.richard.event.annotations.EventRecord;
 import jakarta.inject.Inject;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-
-@MicronautTest
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+//@MicronautTest
+//@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Disabled
 class DeadLetterKafkaEventListenerTest extends AbstractKafkaTest {
 
     private static final String DEAD_LETTER_TOPIC = "product-stream-dead-letter";

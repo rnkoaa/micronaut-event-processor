@@ -1,18 +1,19 @@
 package io.richard.event;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventRecord;
 import jakarta.inject.Inject;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
-
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
+@Disabled
 class EventRecordKafkaListenerTest extends AbstractKafkaTest {
     private static final String ORDER_STREAM_TOPIC = "app-product-stream-test";
     private static final String APP_EVENT_DEAD_LETTER = "app-event-dead-letter";

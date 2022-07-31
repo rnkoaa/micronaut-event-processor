@@ -1,6 +1,7 @@
 plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("io.micronaut.application") version "3.4.1"
+    id("groovy")
 }
 
 version = "0.1"
@@ -45,6 +46,7 @@ graalvmNative.toolchainDetection.set(false)
 micronaut {
     runtime("netty")
     testRuntime("junit5")
+    testRuntime("spock")
     processing {
         incremental(true)
         annotations("io.richard.event.*")
