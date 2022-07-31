@@ -1,37 +1,30 @@
 package io.richard.event;
 
-import io.micronaut.configuration.kafka.annotation.KafkaListener;
-import io.micronaut.configuration.kafka.annotation.OffsetReset;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+
 import io.micronaut.configuration.kafka.annotation.Topic;
 import io.micronaut.test.support.TestPropertyProvider;
 import io.richard.event.annotations.Event;
 import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventRecord;
 import jakarta.inject.Inject;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.KafkaContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
-import org.testcontainers.utility.DockerImageName;
-
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.TimeUnit;
+import org.jetbrains.annotations.NotNull;
+import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
+import org.testcontainers.utility.DockerImageName;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-
-@Disabled
+//@Disabled
 class KafkaEventPublisherTest implements TestPropertyProvider {
     private static final String KAFKA_DOCKER_IMAGE = "confluentinc/cp-kafka:7.2.0";
     private static final String ORDER_STREAM_TOPIC = "order-stream";
     private static final String ORDER_STREAM_DEAD_LETTER_TOPIC = "order-stream-dead-letter";
 
-    @Container
+//    @Container
     private static final KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse(KAFKA_DOCKER_IMAGE));
 
     @Inject
@@ -40,12 +33,12 @@ class KafkaEventPublisherTest implements TestPropertyProvider {
     private static final Collection<EventRecord> eventRecordReceiver = new ConcurrentLinkedDeque<>();
     private static final Collection<EventRecord> deadLetterEventRecordReceiver = new ConcurrentLinkedDeque<>();
 
-    @Test
+//    @Test
     void assertKafkaIsRunning() {
         assertThat(kafkaContainer.isRunning()).isTrue();
     }
 
-    @Test
+//    @Test
     void recordsPublishedWillBeSeenOnSameTopic() {
         var correlationId = UUID.randomUUID();
         var productId = UUID.randomUUID();
@@ -66,7 +59,7 @@ class KafkaEventPublisherTest implements TestPropertyProvider {
         assertThat(data.getClass()).isEqualTo(ProductCreatedEvent.class);
     }
 
-    @Test
+//    @Test
     void deadLetterEventsWillBeReadOnDeadLetterTopic() {
         var correlationId = UUID.randomUUID();
         var productId = UUID.randomUUID();
@@ -88,7 +81,7 @@ class KafkaEventPublisherTest implements TestPropertyProvider {
         assertThat(data.getClass()).isEqualTo(ProductCreatedEvent.class);
     }
 
-    @AfterEach
+//    @AfterEach
     void afterEach() {
         eventRecordReceiver.clear();
     }
@@ -101,7 +94,7 @@ class KafkaEventPublisherTest implements TestPropertyProvider {
         );
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+//    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
 //    @Primary
     static class EventRecordListener {
 

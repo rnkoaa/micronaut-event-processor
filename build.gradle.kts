@@ -27,10 +27,8 @@ dependencies {
 
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation("org.awaitility:awaitility:4.2.0")
-    testImplementation("org.mockito:mockito-core:4.6.1")
-    testImplementation("org.mockito:mockito-junit-jupiter:4.6.1")
     testImplementation("org.testcontainers:testcontainers:1.17.3")
-    testImplementation("org.testcontainers:junit-jupiter:1.17.3")
+    testImplementation("org.testcontainers:spock:1.17.3")
     testImplementation("org.testcontainers:kafka:1.17.2")
 }
 
@@ -45,8 +43,7 @@ java {
 graalvmNative.toolchainDetection.set(false)
 micronaut {
     runtime("netty")
-    testRuntime("junit5")
-    testRuntime("spock")
+    testRuntime("spock2")
     processing {
         incremental(true)
         annotations("io.richard.event.*")

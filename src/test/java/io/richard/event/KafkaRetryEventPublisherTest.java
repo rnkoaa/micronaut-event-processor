@@ -10,12 +10,7 @@ import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventRecord;
 import jakarta.inject.Inject;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.testcontainers.containers.KafkaContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 import org.testcontainers.utility.DockerImageName;
 
@@ -27,13 +22,13 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-@Disabled
+//@Disabled
 class KafkaRetryEventPublisherTest implements TestPropertyProvider {
     private static final String KAFKA_DOCKER_IMAGE = "confluentinc/cp-kafka:7.2.0";
     private static final String ORDER_STREAM_TOPIC = "order-stream";
     private static final String ORDER_STREAM_DEAD_LETTER_TOPIC = "order-stream-dead-letter";
 
-    @Container
+//    @Container
     private static final KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse(KAFKA_DOCKER_IMAGE));
 
     @Inject
@@ -45,12 +40,12 @@ class KafkaRetryEventPublisherTest implements TestPropertyProvider {
     @Inject
     ProductCreatedEventProcessor productCreatedEventProcessor;
 
-    @Test
+//    @Test
     void assertKafkaIsRunning() {
         assertThat(kafkaContainer.isRunning()).isTrue();
     }
 
-    @Test
+//    @Test
     void recordsPublishedWillBeSeenOnSameTopic() {
         var correlationId = UUID.randomUUID();
         var productId = UUID.randomUUID();
@@ -71,7 +66,7 @@ class KafkaRetryEventPublisherTest implements TestPropertyProvider {
         assertThat(data.getClass()).isEqualTo(ProductCreatedEvent.class);
     }
 
-    @Test
+//    @Test
     void deadLetterEventsWillBeReadOnDeadLetterTopic() {
         var correlationId = UUID.randomUUID();
         var productId = UUID.randomUUID();
@@ -93,7 +88,7 @@ class KafkaRetryEventPublisherTest implements TestPropertyProvider {
         assertThat(data.getClass()).isEqualTo(ProductCreatedEvent.class);
     }
 
-    @AfterEach
+//    @AfterEach
     void afterEach() {
         eventRecordReceiver.clear();
     }
@@ -106,12 +101,13 @@ class KafkaRetryEventPublisherTest implements TestPropertyProvider {
         );
     }
 
-    @MockBean(ProductCreatedEventProcessor.class)
+//    @MockBean(ProductCreatedEventProcessor.class)
     ProductCreatedEventProcessor productCreatedEventProcessor(){
-        return Mockito.mock(ProductCreatedEventProcessor.class);
+//        return Mockito.mock(ProductCreatedEventProcessor.class);
+        return null;
     }
 
-    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
+//    @KafkaListener(offsetReset = OffsetReset.EARLIEST)
 //    @Primary
     static class EventRecordListener {
 

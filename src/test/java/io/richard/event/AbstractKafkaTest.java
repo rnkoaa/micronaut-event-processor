@@ -4,19 +4,17 @@ import io.micronaut.test.support.TestPropertyProvider;
 import java.util.HashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Disabled;
 import org.testcontainers.containers.KafkaContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.utility.DockerImageName;
 
 //@Testcontainers
 //@MicronautTest
 //@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled
+//@Disabled
 public abstract class AbstractKafkaTest implements TestPropertyProvider {
     static final String KAFKA_DOCKER_IMAGE = "confluentinc/cp-kafka:7.2.0";
 
-    @Container
+//    @Container
     static final KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse(KAFKA_DOCKER_IMAGE));
 
     @Override

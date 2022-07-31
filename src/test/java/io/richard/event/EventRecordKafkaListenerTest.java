@@ -4,30 +4,26 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventRecord;
-import jakarta.inject.Inject;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
-@Disabled
+//@Disabled
 class EventRecordKafkaListenerTest extends AbstractKafkaTest {
     private static final String ORDER_STREAM_TOPIC = "app-product-stream-test";
     private static final String APP_EVENT_DEAD_LETTER = "app-event-dead-letter";
 
-    @Inject
+//    @Inject
     private KafkaEventPublisher kafkaEventPublisher;
 
-    @Inject
+//    @Inject
     private EventCollector eventCollector;
 
-    @Inject
+//    @Inject
     private EventRecordKafkaListener eventRecordKafkaListener;
 
-    @Test
+//    @Test
     void testProductEventInjected() {
         assertThat(kafkaContainer.isRunning()).isTrue();
         assertThat(eventRecordKafkaListener).isNotNull();
@@ -43,12 +39,12 @@ class EventRecordKafkaListenerTest extends AbstractKafkaTest {
         );
     }
 
-    @Test
+//    @Test
     void assertKafkaIsRunning() {
         assertThat(kafkaContainer.isRunning()).isTrue();
     }
 
-    @Test
+//    @Test
     void canProductConsumerRecord() {
         var correlationId = UUID.randomUUID();
         var productId = UUID.randomUUID();
@@ -66,7 +62,7 @@ class EventRecordKafkaListenerTest extends AbstractKafkaTest {
         assertThat(receivedProductCreatedEvent).isEqualTo(productCreatedEvent);
     }
 
-    @Test
+//    @Test
     void canConsumeProductUpdatedEvent() {
         var correlationId = UUID.randomUUID();
         var productId = UUID.randomUUID();
@@ -84,7 +80,7 @@ class EventRecordKafkaListenerTest extends AbstractKafkaTest {
         assertThat(receivedProductCreatedEvent).isEqualTo(productUpdatedEvent);
     }
 
-    @AfterEach
+//    @AfterEach
     void afterEach() {
         eventCollector.clear();
     }

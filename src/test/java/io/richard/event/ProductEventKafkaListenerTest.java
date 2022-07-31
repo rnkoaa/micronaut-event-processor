@@ -1,5 +1,7 @@
 package io.richard.event;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.env.PropertySource;
 import io.micronaut.runtime.server.EmbeddedServer;
@@ -7,29 +9,20 @@ import io.micronaut.test.support.TestPropertyProvider;
 import io.richard.event.annotations.Event;
 import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventRecord;
-import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.KafkaContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
-import org.testcontainers.utility.DockerImageName;
-
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import org.jetbrains.annotations.NotNull;
+import org.testcontainers.containers.KafkaContainer;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
+import org.testcontainers.utility.DockerImageName;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
-@Disabled
+//@Disabled
 class ProductEventKafkaListenerTest implements TestPropertyProvider {
     private static final String KAFKA_DOCKER_IMAGE = "confluentinc/cp-kafka:7.2.0";
     private static final String ORDER_STREAM_TOPIC = "app-product-stream-test";
     private static final String APP_EVENT_DEAD_LETTER = "app-event-dead-letter";
 
-    @Container
     private static final KafkaContainer kafkaContainer = new KafkaContainer(DockerImageName.parse(KAFKA_DOCKER_IMAGE));
 
     private static ApplicationContext applicationContext;
@@ -37,7 +30,6 @@ class ProductEventKafkaListenerTest implements TestPropertyProvider {
     private KafkaEventPublisher kafkaEventPublisher;
     private EventRecordCollector eventRecordCollector;
 
-    @BeforeAll
     static void beforeAll() {
         EmbeddedServer embeddedServer = ApplicationContext.run(EmbeddedServer.class, PropertySource.of("test", Map.of(
             "micronaut.application.name", "producer-test-application",
@@ -48,15 +40,12 @@ class ProductEventKafkaListenerTest implements TestPropertyProvider {
         applicationContext = embeddedServer.getApplicationContext();
     }
 
-    @BeforeEach
     void beforeEach() {
         eventRecordKafkaListener = applicationContext.getBean(EventRecordKafkaListener.class);
         kafkaEventPublisher = applicationContext.getBean(KafkaEventPublisher.class);
         eventRecordCollector = applicationContext.getBean(EventRecordCollector.class);
     }
 
-    @Disabled
-    @Test
     void testProductEventInjected() {
         assertThat(kafkaContainer.isRunning()).isTrue();
         assertThat(eventRecordKafkaListener).isNotNull();
@@ -74,14 +63,10 @@ class ProductEventKafkaListenerTest implements TestPropertyProvider {
         );
     }
 
-    @Disabled
-    @Test
     void assertKafkaIsRunning() {
         assertThat(kafkaContainer.isRunning()).isTrue();
     }
 
-    @Disabled
-    @Test
     void canProductConsumerRecord() {
         var correlationId = UUID.randomUUID();
         var productId = UUID.randomUUID();
