@@ -98,9 +98,4 @@ public class Event<T> {
         this.correlationId = correlationId;
         return this;
     }
-
-//    public Event<?> withMetadata(EventMetadata metadata) {
-//        new Event<?>()
-//        return this;
-//    }
 }

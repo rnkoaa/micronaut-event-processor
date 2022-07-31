@@ -17,4 +17,9 @@ public record RetryPolicy(
     public RetryPolicy() {
         this(5, 0, Instant.now());
     }
+
+    public RetryPolicy incrementRetryCounter() {
+        var nextCounter = retryCounter + 1;
+        return new RetryPolicy(maxRetry, nextCounter, Instant.now());
+    }
 }

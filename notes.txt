@@ -1,3 +1,5 @@
+https://cwiki.apache.org/confluence/display/KAFKA/KIP-62%3A+Allow+consumer+to+send+heartbeats+from+a+background+thread
+https://strimzi.io/blog/2021/01/07/consumer-tuning/
 https://eng.uber.com/reliable-reprocessing/
 
 @Singleton
