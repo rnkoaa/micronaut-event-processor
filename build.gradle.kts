@@ -17,6 +17,9 @@ dependencies {
     implementation(project(":event-annotation-processor"))
     annotationProcessor(project(":event-annotation-processor"))
 
+    implementation("jakarta.annotation:jakarta.annotation-api:2.1.1")
+    implementation("org.jetbrains:annotations:23.0.0")
+
     annotationProcessor("io.micronaut:micronaut-http-validation")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")

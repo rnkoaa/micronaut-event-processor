@@ -23,7 +23,7 @@ class EventRecordKafkaListenerSpec extends AbstractKafkaSpec {
         eventCollector = context.getBean(EventCollector)
     }
 
-    void "events can be produced and consumed successfully"() {
+    void "records published will be seen on same topic"() {
         given:
         var correlationId = UUID.randomUUID()
         var productId = UUID.randomUUID()
