@@ -1,30 +1,11 @@
-package io.richard.event;
+package io.richard.event
 
-import io.micronaut.configuration.kafka.annotation.KafkaListener;
-import io.micronaut.configuration.kafka.annotation.OffsetReset;
-import io.micronaut.configuration.kafka.annotation.Topic;
-import io.micronaut.test.annotation.MockBean;
-import io.micronaut.test.support.TestPropertyProvider;
-import io.richard.event.annotations.Event;
-import io.richard.event.annotations.EventMetadata;
-import io.richard.event.annotations.EventRecord;
-import jakarta.inject.Inject;
-import org.jetbrains.annotations.NotNull;
-import org.testcontainers.containers.KafkaContainer;
-import org.testcontainers.shaded.org.awaitility.Awaitility;
-import org.testcontainers.utility.DockerImageName;
+import spock.lang.Specification
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentLinkedDeque;
-import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-
-//@Disabled
-class KafkaRetryEventPublisherTest implements TestPropertyProvider {
-    private static final String KAFKA_DOCKER_IMAGE = "confluentinc/cp-kafka:7.2.0";
+class KafkaRetryEventPublisherSpec extends Specification {
+/*
+private static final String KAFKA_DOCKER_IMAGE = "confluentinc/cp-kafka:7.2.0";
     private static final String ORDER_STREAM_TOPIC = "order-stream";
     private static final String ORDER_STREAM_DEAD_LETTER_TOPIC = "order-stream-dead-letter";
 
@@ -121,4 +102,5 @@ class KafkaRetryEventPublisherTest implements TestPropertyProvider {
             deadLetterEventRecordReceiver.add(eventRecord);
         }
     }
+ */
 }

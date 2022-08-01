@@ -14,6 +14,5 @@ class KafkaTestContainer {
             kafkaContainer = new KafkaContainer(DockerImageName.parse(KAFKA_DOCKER_IMAGE));
             kafkaContainer.start()
         }
-
     }
 }
