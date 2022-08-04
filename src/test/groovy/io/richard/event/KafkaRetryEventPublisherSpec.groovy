@@ -1,3 +1,4 @@
+//file:noinspection GrMethodMayBeStatic
 package io.richard.event
 
 import io.micronaut.configuration.kafka.annotation.KafkaListener
@@ -24,7 +25,7 @@ class KafkaRetryEventPublisherSpec extends AbstractKafkaSpec {
 
     private static final String EVENT_TOPIC = "app-topic"
     private static final String EVENT_RETRY_TOPIC = "app-retry-topic"
-    private static final String EVENT_DEADLETTER_TOPIC = "app-dead-letter-topic"
+    private static final String EVENT_DEAD_LETTER_TOPIC = "app-dead-letter-topic"
     private static final String EVENT_ERROR_TOPIC = "app-error-topic"
     private static final Collection<EventRecord> eventRecordReceiver = new ConcurrentLinkedDeque<>()
     private static final Collection<EventRecord> deadLetterEventRecordReceiver = new ConcurrentLinkedDeque<>()
@@ -50,7 +51,7 @@ class KafkaRetryEventPublisherSpec extends AbstractKafkaSpec {
         return [
                 "app.event.topic"             : EVENT_TOPIC,
                 "app.event.retry.topic"       : EVENT_RETRY_TOPIC,
-                "app.event.dead-letter.topic" : EVENT_DEADLETTER_TOPIC,
+                "app.event.dead-letter.topic" : EVENT_DEAD_LETTER_TOPIC,
                 "app.event.error.topic"       : EVENT_ERROR_TOPIC,
                 "should-dead-letter-unhandled": "true"
         ]
@@ -60,7 +61,6 @@ class KafkaRetryEventPublisherSpec extends AbstractKafkaSpec {
     String getSpecName() {
         return "KafkaRetryEventPublisherSpec"
     }
-
 
     void "retry exceptions will republish message unto retry topic until it succeeds"() {
         given:
@@ -73,15 +73,23 @@ class KafkaRetryEventPublisherSpec extends AbstractKafkaSpec {
 
         when:
         kafkaEventPublisher.publish(productId, eventRecord)
+
+        // waiting for event to dlq, if the event dlqs, we would have retried it x amount of times.
         Awaitility.await()
                 .atMost(180, TimeUnit.SECONDS)
-                .until(() -> retryEventRecordReceiver.size() > 0)
+                .until(() -> deadLetterEventRecordReceiver.size() > 0)
 
         then:
+        retryEventRecordReceiver.size() == 5
         EventRecord receivedRecord = retryEventRecordReceiver.last
         receivedRecord != null
+
+        and:
+        Object recordItem = receivedRecord.getTypedData(receivedRecord.eventClass())
+        productCreatedEvent == recordItem
     }
 
+    @SuppressWarnings('unused')
     @Singleton
     @KafkaEventProcessor(ProductUpdatedEvent.class)
     @Primary
@@ -95,6 +103,7 @@ class KafkaRetryEventPublisherSpec extends AbstractKafkaSpec {
         }
     }
 
+    @SuppressWarnings('unused')
     @Singleton
     @Primary
     @Requires(property = "spec.name", value = "KafkaRetryEventPublisherSpec")
@@ -126,7 +135,7 @@ class KafkaRetryEventPublisherSpec extends AbstractKafkaSpec {
             eventRecordReceiver.add(eventRecord)
         }
 
-        @Topic(EVENT_DEADLETTER_TOPIC)
+        @Topic(EVENT_DEAD_LETTER_TOPIC)
         void receiveDeadLetter(EventRecord eventRecord) {
             deadLetterEventRecordReceiver.add(eventRecord)
         }

@@ -26,7 +26,6 @@ public class EventRecordDeserializer extends JsonDeserializer<EventRecord> {
         ObjectMapper objectMapper = (ObjectMapper) jp.getCodec();
         JsonNode node = objectMapper.readTree(jp);
         byte[] rawData = objectMapper.writeValueAsBytes(jp);
-        System.out.println(objectMapper.writeValueAsString(jp));
         TreeNode metadata = node.get(EVENT_METADATA_KEY);
         if (metadata == null) {
             throw new IllegalStateException("metadata object required to be deserialized");

@@ -54,7 +54,7 @@ public class EventPublishingService {
             publishingKey = UUID.nameUUIDFromBytes(partionable.getPartitionKey().getBytes());
         }
 
-        kafkaEventPublisher.publish(publishingKey, headers, eventRecord);
+        kafkaEventPublisher.publish(publishingKey, eventRecord, headers);
     }
 
     private RecordHeader uuidHeader(String key, UUID value) {

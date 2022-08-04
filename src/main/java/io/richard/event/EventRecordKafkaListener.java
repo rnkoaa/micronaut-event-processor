@@ -98,8 +98,10 @@ public class EventRecordKafkaListener {
             }
             retry = retry.incrementRetryCounter();
             var retryEventRecord = finalEventRecord.withMetadata(metadata.withRetry(retry));
-            if (retry.retryCounter() > retry.maxRetry()) {
-                // we've exceeded our retry counts, deadletter
+            if (retry.retryCounter() >= retry.maxRetry()) {
+                LOGGER.debug("Exceeded max retry count of {}, dead lettering event with id {}",
+                    retry.maxRetry(), eventRecord.id());
+                // we've exceeded our retry counts, dead letter
                 deadLetterEventPublisher.handle(retryEventRecord);
                 return;
             }
@@ -108,7 +110,7 @@ public class EventRecordKafkaListener {
             headers.forEach((key, value) -> kafkaHeaders.add(
                 new RecordHeader(key, ((String) value).getBytes(Charset.defaultCharset()))));
 
-            kafkaEventPublisher.publishRetry(event.getPartitionKey(), kafkaHeaders, retryEventRecord);
+            kafkaEventPublisher.publishRetry(event.getPartitionKey(), retryEventRecord, kafkaHeaders);
         } catch (Exception ex) {
             System.out.println("Got an unhandled exception " + ex.getMessage());
         }
@@ -144,7 +146,7 @@ public class EventRecordKafkaListener {
             headers.forEach((key, value) -> kafkaHeaders.add(
                 new RecordHeader(key, ((String) value).getBytes(Charset.defaultCharset()))));
 
-            kafkaEventPublisher.publishRetry(event.getPartitionKey(), kafkaHeaders, retryEventRecord);
+            kafkaEventPublisher.publishRetry(event.getPartitionKey(), retryEventRecord, kafkaHeaders);
         } catch (Exception ex) {
             System.out.println("Got an unhandled exception");
 
