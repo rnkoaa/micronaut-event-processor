@@ -17,26 +17,26 @@ public interface KafkaEventPublisher {
     void publish(@KafkaKey UUID partitionKey, EventRecord eventRecord);
 
     @Topic("${app.event.topic}")
-    void publish(@KafkaKey UUID partitionKey, Headers headers, EventRecord eventRecord);
+    void publish(@KafkaKey UUID partitionKey, EventRecord eventRecord, Headers headers);
 
     @Topic("${app.event.topic}")
-    void publish(@KafkaKey UUID partitionKey, Collection<Header> headers, EventRecord eventRecord);
+    void publish(@KafkaKey UUID partitionKey, EventRecord eventRecord, Collection<Header> headers);
 
     @Topic("${app.event.dead-letter.topic}")
     void publishDeadLetter(@KafkaKey UUID partitionKey, EventRecord eventRecord);
 
     @Topic("${app.event.dead-letter.topic}")
-    void publishDeadLetter(@KafkaKey UUID partitionKey, Headers headers, EventRecord eventRecord);
+    void publishDeadLetter(@KafkaKey UUID partitionKey, EventRecord eventRecord, Headers headers);
 
     @Topic("${app.event.dead-letter.topic}")
-    void publishDeadLetter(@KafkaKey UUID partitionKey, Collection<Header> headers, EventRecord eventRecord);
+    void publishDeadLetter(@KafkaKey UUID partitionKey, EventRecord eventRecord, Collection<Header> headers);
 
     @Topic("${app.event.retry.topic}")
     void publishRetry(UUID partitionKey, EventRecord retryEventRecord);
 
     @Topic("${app.event.retry.topic}")
-    void publishRetry(@KafkaKey UUID partitionKey, Collection<Header> headers, EventRecord eventRecord);
+    void publishRetry(@KafkaKey UUID partitionKey, EventRecord eventRecord, Collection<Header> headers);
 
     @Topic("${app.event.retry.topic}")
-    void publishRetry(@KafkaKey UUID partitionKey, Headers headers, EventRecord eventRecord);
+    void publishRetry(@KafkaKey UUID partitionKey, EventRecord eventRecord, Headers headers);
 }

@@ -1,6 +1,6 @@
 applicationType: default
 defaultPackage: io.richard.event
-testFramework: junit
+testFramework: spock
 sourceLanguage: java
 buildTool: gradle_kotlin
 features: [annotation-api, app-name, gradle, http-client, jackson-databind, java, java-application, junit, logback, micronaut-build, netty-server, readme, shade, yaml]

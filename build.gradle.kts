@@ -1,6 +1,7 @@
 plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
     id("io.micronaut.application") version "3.4.1"
+    id("groovy")
 }
 
 version = "0.1"
@@ -16,6 +17,9 @@ dependencies {
     implementation(project(":event-annotation-processor"))
     annotationProcessor(project(":event-annotation-processor"))
 
+    implementation("jakarta.annotation:jakarta.annotation-api:2.1.1")
+    implementation("org.jetbrains:annotations:23.0.0")
+
     annotationProcessor("io.micronaut:micronaut-http-validation")
     implementation("io.micronaut:micronaut-http-client")
     implementation("io.micronaut:micronaut-jackson-databind")
@@ -26,10 +30,8 @@ dependencies {
 
     testImplementation("org.assertj:assertj-core:3.23.1")
     testImplementation("org.awaitility:awaitility:4.2.0")
-    testImplementation("org.mockito:mockito-core:4.6.1")
-    testImplementation("org.mockito:mockito-junit-jupiter:4.6.1")
     testImplementation("org.testcontainers:testcontainers:1.17.3")
-    testImplementation("org.testcontainers:junit-jupiter:1.17.3")
+    testImplementation("org.testcontainers:spock:1.17.3")
     testImplementation("org.testcontainers:kafka:1.17.2")
 }
 
@@ -44,7 +46,7 @@ java {
 graalvmNative.toolchainDetection.set(false)
 micronaut {
     runtime("netty")
-    testRuntime("junit5")
+    testRuntime("spock2")
     processing {
         incremental(true)
         annotations("io.richard.event.*")
