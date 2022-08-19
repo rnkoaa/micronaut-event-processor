@@ -16,6 +16,7 @@ dependencies {
     implementation(project(":event-common"))
     implementation(project(":event-annotation-processor"))
     annotationProcessor(project(":event-annotation-processor"))
+    annotationProcessor(project(":micronaut-proxy-provider"))
 
     implementation("jakarta.annotation:jakarta.annotation-api:2.1.1")
     implementation("org.jetbrains:annotations:23.0.0")
