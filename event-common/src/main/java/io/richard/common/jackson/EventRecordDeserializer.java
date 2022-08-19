@@ -72,8 +72,9 @@ public class EventRecordDeserializer extends JsonDeserializer<EventRecord> {
             exceptionSummary = objectMapper.readValue(exceptionSummaryNode.traverse(), ExceptionSummary.class);
         }
 
-        return new EventRecord(UUID.fromString(eventId), eventSource, eventType, eventTimestamp, simpleType,
-            eventMetadata, eventClass, rawData, eventObject, new HashMap<>(), exceptionSummary);
+//        return new EventRecord(UUID.fromString(eventId), eventSource, eventType, eventTimestamp, simpleType,
+//            eventMetadata, eventClass, rawData, eventObject, new HashMap<>(), exceptionSummary);
+        return null;
     }
 
     boolean isNullOrEmpty(String value) {

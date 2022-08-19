@@ -131,13 +131,13 @@ class KafkaEventPublisherSpec extends AbstractKafkaSpec {
     }
 
     @Singleton
-    @KafkaEventProcessor(ProductUpdatedEvent.class)
     @Primary
     @Replaces(ProductUpdatedEventProcessor)
     @Requires(property = "spec.name", value = "KafkaEventPublisherSpec")
     static class MockProductUpdatedEventProcessor implements EventProcessor<ProductUpdatedEvent> {
 
         @Override
+        @KafkaEventProcessor
         void process(ProductUpdatedEvent event) {
             throw new DeadLetterException("rejecting event in process")
         }

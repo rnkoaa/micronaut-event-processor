@@ -5,7 +5,6 @@ import io.richard.event.processor.EventProcessor;
 import jakarta.inject.Singleton;
 
 @Singleton
-@KafkaEventProcessor(ProductUpdatedEvent.class)
 public class ProductUpdatedEventProcessor implements EventProcessor<ProductUpdatedEvent> {
     private final EventCollector eventCollector;
 
@@ -14,6 +13,7 @@ public class ProductUpdatedEventProcessor implements EventProcessor<ProductUpdat
     }
 
     @Override
+    @KafkaEventProcessor
     public void process(ProductUpdatedEvent event) {
         System.out.println("processing ProductUpdatedEvent " + event);
         eventCollector.add(event);

@@ -1,37 +1,7 @@
 package io.richard.event.annotations;
 
-import static javax.lang.model.element.Modifier.PUBLIC;
-
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeSpec;
-import io.micronaut.context.ApplicationContext;
-import io.micronaut.context.event.BeanCreatedEvent;
-import io.micronaut.context.event.BeanCreatedEventListener;
-import jakarta.inject.Named;
-import jakarta.inject.Singleton;
-import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.annotation.processing.Filer;
-import javax.lang.model.element.AnnotationMirror;
-import javax.lang.model.element.AnnotationValue;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.Elements;
-
 public class EventProcessorGroupFactoryGenerator {
-
+/*
     private static final String CONTEXT_FIELD_NAME = "context";
     private final Map<String, KafkaEventAnnotatedClass> itemsMap = new LinkedHashMap<>();
     private static final String PACKAGE_NAME = "io.richard.event.processor";
@@ -126,9 +96,9 @@ public class EventProcessorGroupFactoryGenerator {
             .build();
     }
 
-    /**
+    *//**
      * Gets the value of a named parameter on the specified annotation or {@code null} if the parameter is not set.
-     */
+     *//*
     private static Optional<ClassName> getAnnotationValue(AnnotationMirror annotation, String valueName) {
         // Get all of the values on that annotation
         Map<ExecutableElement, AnnotationValue> vals = Map.copyOf(annotation.getElementValues());
@@ -177,5 +147,5 @@ public class EventProcessorGroupFactoryGenerator {
     public static ParameterizedTypeName getParameterizedBeanCreatedEvent() {
         return ParameterizedTypeName.get(ClassName.get(BeanCreatedEvent.class),
             ClassName.get(EventProcessorGroup.class));
-    }
+    }*/
 }

@@ -91,13 +91,13 @@ class KafkaRetryEventPublisherSpec extends AbstractKafkaSpec {
 
     @SuppressWarnings('unused')
     @Singleton
-    @KafkaEventProcessor(ProductUpdatedEvent.class)
     @Primary
     @Replaces(ProductUpdatedEventProcessor)
     @Requires(property = "spec.name", value = "KafkaRetryEventPublisherSpec")
     static class MockProductUpdatedEventProcessor implements EventProcessor<ProductUpdatedEvent> {
 
         @Override
+        @KafkaEventProcessor
         void process(ProductUpdatedEvent event) {
             println "Do nothing"
         }

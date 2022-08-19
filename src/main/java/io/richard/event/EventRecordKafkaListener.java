@@ -1,36 +1,28 @@
 package io.richard.event;
 
+import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
+
 import io.micronaut.configuration.kafka.annotation.ErrorStrategy;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
 import io.micronaut.configuration.kafka.annotation.OffsetReset;
 import io.micronaut.configuration.kafka.annotation.Topic;
-import io.richard.event.annotations.Event;
 import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventProcessorGroup;
 import io.richard.event.annotations.EventRecord;
-import io.richard.event.annotations.ExceptionSummary;
-import io.richard.event.annotations.RetryPolicy;
 import io.richard.event.error.DeadLetterException;
 import io.richard.event.error.RetryableException;
 import io.richard.event.processor.DeadLetterEventPublisher;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.header.Header;
-import org.apache.kafka.common.header.Headers;
-import org.apache.kafka.common.header.internals.RecordHeader;
-import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
 
 @KafkaListener(groupId = "${app.event.groupId}", offsetReset = OffsetReset.EARLIEST, errorStrategy = @ErrorStrategy(value = RESUME_AT_NEXT_RECORD, retryDelay = "50ms", retryCount = 0))
 public class EventRecordKafkaListener {
@@ -76,41 +68,41 @@ public class EventRecordKafkaListener {
     void consumeRetryEvents(ConsumerRecord<String, EventRecord> consumerRecord,
         Consumer<String, byte[]> kafkaConsumer) {
         EventRecord eventRecord = consumerRecord.value();
-        Map<String, Object> headers = extractHeaders(consumerRecord);
-        String correlationId = (String) headers.getOrDefault("correlation-id", UUID.randomUUID().toString());
-        EventMetadata metadata = enrichMetadata(consumerRecord.topic(), correlationId, eventRecord.metadata());
-        var finalEventRecord = eventRecord.withHeaders(headers);
-        Event<?> event = finalEventRecord.getEvent(eventRecord.eventClass());
-        event = event.withCorrelationId(UUID.fromString(correlationId));
+//        Map<String, Object> headers = extractHeaders(consumerRecord);
+//        String correlationId = (String) headers.getOrDefault("correlation-id", UUID.randomUUID().toString());
+//        EventMetadata metadata = enrichMetadata(consumerRecord.topic(), correlationId, eventRecord.metadata());
+//        var finalEventRecord = eventRecord.withHeaders(headers);
+//        Event<?> event = finalEventRecord.getEvent(eventRecord.eventClass());
+//        event = event.withCorrelationId(UUID.fromString(correlationId));
 
         // TODO before we process the retry message, we should ensure that the next retry message has been met
         try {
-            eventProcessorGroup.processEvent(event, metadata);
+//            eventProcessorGroup.processEvent(event, metadata);
         } catch (DeadLetterException ex) {
-            metadata = metadata.withDead(true);
-            eventRecord = eventRecord.withMetadata(metadata);
-            eventRecord = eventRecord.withException(new ExceptionSummary(ex));
-            deadLetterEventPublisher.handle(eventRecord);
+//            metadata = metadata.withDead(true);
+//            eventRecord = eventRecord.withMetadata(metadata);
+//            eventRecord = eventRecord.withException(new ExceptionSummary(ex));
+//            deadLetterEventPublisher.handle(eventRecord);
         } catch (RetryableException ex) {
-            RetryPolicy retry = metadata.retry();
-            if (retry == null) {
-                retry = new RetryPolicy();
-            }
-            retry = retry.incrementRetryCounter();
-            var retryEventRecord = finalEventRecord.withMetadata(metadata.withRetry(retry));
-            if (retry.retryCounter() >= retry.maxRetry()) {
-                LOGGER.debug("Exceeded max retry count of {}, dead lettering event with id {}",
-                    retry.maxRetry(), eventRecord.id());
-                // we've exceeded our retry counts, dead letter
-                deadLetterEventPublisher.handle(retryEventRecord);
-                return;
-            }
-
-            Headers kafkaHeaders = new RecordHeaders();
-            headers.forEach((key, value) -> kafkaHeaders.add(
-                new RecordHeader(key, ((String) value).getBytes(Charset.defaultCharset()))));
-
-            kafkaEventPublisher.publishRetry(event.getPartitionKey(), retryEventRecord, kafkaHeaders);
+//            RetryPolicy retry = metadata.retry();
+//            if (retry == null) {
+//                retry = new RetryPolicy();
+//            }
+//            retry = retry.incrementRetryCounter();
+//            var retryEventRecord = finalEventRecord.withMetadata(metadata.withRetry(retry));
+//            if (retry.retryCounter() >= retry.maxRetry()) {
+//                LOGGER.debug("Exceeded max retry count of {}, dead lettering event with id {}",
+//                    retry.maxRetry(), eventRecord.id());
+//                // we've exceeded our retry counts, dead letter
+//                deadLetterEventPublisher.handle(retryEventRecord);
+//                return;
+//            }
+//
+//            Headers kafkaHeaders = new RecordHeaders();
+//            headers.forEach((key, value) -> kafkaHeaders.add(
+//                new RecordHeader(key, ((String) value).getBytes(Charset.defaultCharset()))));
+//
+//            kafkaEventPublisher.publishRetry(event.getPartitionKey(), retryEventRecord, kafkaHeaders);
         } catch (Exception ex) {
             System.out.println("Got an unhandled exception " + ex.getMessage());
         }
@@ -123,30 +115,30 @@ public class EventRecordKafkaListener {
     @Topic("${app.event.topic}")
     void consumeEvents(ConsumerRecord<String, EventRecord> consumerRecord, Consumer<String, byte[]>
         kafkaConsumer) {
-        EventRecord eventRecord = consumerRecord.value();
+       /* EventRecord eventRecord = consumerRecord.value();
         Map<String, Object> headers = extractHeaders(consumerRecord);
         String correlationId = (String) headers.getOrDefault("correlation-id", UUID.randomUUID().toString());
         EventMetadata metadata = enrichMetadata(consumerRecord.topic(), correlationId, eventRecord.metadata());
         var finalEventRecord = eventRecord.withHeaders(headers);
         Event<?> event = finalEventRecord.getEvent(eventRecord.eventClass());
-        event = event.withCorrelationId(UUID.fromString(correlationId));
+        event = event.withCorrelationId(UUID.fromString(correlationId));*/
 
         try {
-            eventProcessorGroup.processEvent(event, metadata);
+//            eventProcessorGroup.processEvent(event, metadata);
         } catch (DeadLetterException ex) {
-            metadata = metadata.withDead(true);
+           /* metadata = metadata.withDead(true);
             eventRecord = eventRecord.withMetadata(metadata);
             eventRecord = eventRecord.withException(new ExceptionSummary(ex));
-            deadLetterEventPublisher.handle(eventRecord);
+            deadLetterEventPublisher.handle(eventRecord);*/
         } catch (RetryableException ex) {
-            var retry = new RetryPolicy();
+           /* var retry = new RetryPolicy();
             var retryEventRecord = finalEventRecord.withMetadata(metadata.withRetry(retry));
 
             Headers kafkaHeaders = new RecordHeaders();
             headers.forEach((key, value) -> kafkaHeaders.add(
                 new RecordHeader(key, ((String) value).getBytes(Charset.defaultCharset()))));
 
-            kafkaEventPublisher.publishRetry(event.getPartitionKey(), retryEventRecord, kafkaHeaders);
+            kafkaEventPublisher.publishRetry(event.getPartitionKey(), retryEventRecord, kafkaHeaders);*/
         } catch (Exception ex) {
             System.out.println("Got an unhandled exception");
 

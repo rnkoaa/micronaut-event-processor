@@ -36,7 +36,7 @@ public class EventPublishingService {
     void publish(final String topic, final UUID partitionKey, Object event) {
 
         var eventMetadata = new EventMetadata();
-        var eventRecord = new EventRecord(UUID.randomUUID(), "source", event, eventMetadata);
+//        var eventRecord = new EventRecord(UUID.randomUUID(), "source", event, eventMetadata);
 
         // set up headers
         Collection<Header> headers = List.of(
@@ -54,7 +54,7 @@ public class EventPublishingService {
             publishingKey = UUID.nameUUIDFromBytes(partionable.getPartitionKey().getBytes());
         }
 
-        kafkaEventPublisher.publish(publishingKey, eventRecord, headers);
+//        kafkaEventPublisher.publish(publishingKey, eventRecord, headers);
     }
 
     private RecordHeader uuidHeader(String key, UUID value) {

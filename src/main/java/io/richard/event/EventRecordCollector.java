@@ -20,7 +20,7 @@ public class EventRecordCollector {
     }
 
     public void remove(UUID id) {
-        records.removeIf(rec -> rec.id().equals(id));
+//        records.removeIf(rec -> rec.id().equals(id));
     }
 
     public Collection<EventRecord> all() {

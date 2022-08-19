@@ -11,16 +11,17 @@ repositories {
 
 dependencies {
     implementation(project(":annotations"))
-    annotationProcessor "io.micronaut:micronaut-inject-java:$micronautVersion"
-    api "io.micronaut:micronaut-inject:$micronautVersion"
+    implementation("com.squareup:javapoet:1.13.0")
+    implementation("jakarta.inject:jakarta.inject-api:2.0.1")
+    annotationProcessor("com.google.auto.service:auto-service:1.0.1")
+    compileOnly("com.google.auto.service:auto-service:1.0.1")
+//    annotationProcessor "io.micronaut:micronaut-inject-java:$micronautVersion"
+//    api "io.micronaut:micronaut-inject:$micronautVersion"
 
-    annotationProcessor('com.google.auto.service:auto-service:1.0.1')
-    implementation ('io.vavr:vavr:0.10.4')
-    implementation('com.google.auto.service:auto-service:1.0.1')
-    implementation('com.squareup:javapoet:1.13.0')
     implementation('javax.persistence:javax.persistence-api:2.2')
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.0'
+
 }
 
 test {

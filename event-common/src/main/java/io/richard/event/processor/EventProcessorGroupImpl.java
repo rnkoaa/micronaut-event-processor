@@ -34,12 +34,12 @@ public class EventProcessorGroupImpl extends HashMap<Class<?>, Object> implement
 
             if (eventProcessorConfig.shouldDeadLetterUnhandled()) {
 
-                EventRecord eventRecord = new EventRecord(
-                    event.getId(), eventMetadata.sourceTopic(), event.getType(),
-                    event.getTimestamp(), event.getName(), eventMetadata, event.getEventType(),
-                    null, event.getData(), Map.of(), new ExceptionSummary(exceptionMessage)
-                );
-                deadLetterEventPublisher.handle(eventRecord);
+//                EventRecord eventRecord = new EventRecord(
+//                    event.getId(), eventMetadata.sourceTopic(), event.getType(),
+//                    event.getTimestamp(), event.getName(), eventMetadata, event.getEventType(),
+//                    null, event.getData(), Map.of(), new ExceptionSummary(exceptionMessage)
+//                );
+//                deadLetterEventPublisher.handle(eventRecord);
             }
 
             return;
