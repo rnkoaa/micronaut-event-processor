@@ -1,7 +1,7 @@
 package io.richard.event;
 
 import io.richard.event.annotations.EventMetadata;
-import io.richard.event.annotations.EventRecord;
+import io.richard.event.annotations.Strings;
 import jakarta.inject.Singleton;
 import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.internals.RecordHeader;
@@ -30,12 +30,11 @@ public class EventPublishingService {
 
     /**
      * @param topic
-     * @param partitionKey
+     * @param eventMetadata
      * @param event
      */
-    void publish(final String topic, final UUID partitionKey, Object event) {
+    void publish(final String topic, final EventMetadata eventMetadata, Object event) {
 
-        var eventMetadata = new EventMetadata();
 //        var eventRecord = new EventRecord(UUID.randomUUID(), "source", event, eventMetadata);
 
         // set up headers
@@ -49,9 +48,9 @@ public class EventPublishingService {
             publishingTopic = topical.getTopic();
         }
 
-        UUID publishingKey = (partitionKey != null) ? partitionKey : UUID.randomUUID();
+        String publishingKey = (eventMetadata.partitionKey() != null) ? eventMetadata.partitionKey() : UUID.randomUUID().toString();
         if (event instanceof WithPartition partionable && Strings.isNotNullAndEmpty(partionable.getPartitionKey())) {
-            publishingKey = UUID.nameUUIDFromBytes(partionable.getPartitionKey().getBytes());
+            publishingKey = partionable.getPartitionKey();
         }
 
 //        kafkaEventPublisher.publish(publishingKey, eventRecord, headers);

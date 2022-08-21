@@ -16,10 +16,13 @@ public record DeadLetterEventRecord(
 ) {
 
     public DeadLetterEventRecord(Map<String, Object> headers) {
-        this(UUID.randomUUID(), Instant.now(), new EventMetadata(), null, headers);
+        this(UUID.randomUUID(),
+            Instant.now(),
+            EventMetadata.fromKafkaEventHeaders(headers),
+            null, headers);
     }
 
     public DeadLetterEventRecord(ErrorContext errorContext, Map<String, Object> headers) {
-        this(UUID.randomUUID(), Instant.now(), new EventMetadata(), errorContext, headers);
+        this(UUID.randomUUID(), Instant.now(), EventMetadata.fromKafkaEventHeaders(headers), errorContext, headers);
     }
 }

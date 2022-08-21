@@ -51,7 +51,7 @@ public record EventRecord(
 
     public EventRecord(Object data, UUID correlationId, String partitionKey) {
         this(UUID.randomUUID(), data, "", correlationId, partitionKey,
-            new EventMetadata(),
+            new EventMetadata(data.getClass(), correlationId, partitionKey),
             Map.of(
                 CORRELATION_ID, correlationId,
                 PARTITION_KEY, partitionKey

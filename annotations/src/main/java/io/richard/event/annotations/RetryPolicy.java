@@ -12,14 +12,20 @@ public record RetryPolicy(
     int retryCounter,
 
     @JsonProperty("next_retry")
-    Instant nextRetry
+    Instant nextRetry,
+
+    boolean dead
 ) {
     public RetryPolicy() {
-        this(5, 0, Instant.now());
+        this(5, 0, Instant.now(), false);
     }
 
     public RetryPolicy incrementRetryCounter() {
         var nextCounter = retryCounter + 1;
-        return new RetryPolicy(maxRetry, nextCounter, Instant.now());
+        return new RetryPolicy(maxRetry, nextCounter, Instant.now(), dead);
+    }
+
+    public RetryPolicy markDead() {
+        return new RetryPolicy(maxRetry, retryCounter, Instant.now(), true);
     }
 }

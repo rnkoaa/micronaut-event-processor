@@ -1,6 +1,41 @@
 package io.richard.event;
 
 import static io.micronaut.configuration.kafka.annotation.ErrorStrategyValue.RESUME_AT_NEXT_RECORD;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_CLOUD_EVENT_TRACE_ID;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_CONTENT_TYPE;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_CORRELATION_ID;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_EVENT_PRIORITY;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_EVENT_TIMESTAMP;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_EVENT_VERSION;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_ID;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_IS_EVENT_DEAD;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_MAX_RETRY;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_NEXT_RETRY;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_OBJECT_TYPE;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_PARENT_ID;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_PARTITION_KEY;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_PUBLISHED_TIMESTAMP;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_RETRY_COUNT;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_SIMPLE_OBJECT_TYPE;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_SOURCE;
+import static io.richard.event.KafkaEventHeaderKeys.KAFKA_SOURCE_TOPIC;
+import static io.richard.event.annotations.EventRecordHeaders.CONTENT_TYPE;
+import static io.richard.event.annotations.EventRecordHeaders.CORRELATION_ID;
+import static io.richard.event.annotations.EventRecordHeaders.EVENT_PRIORITY;
+import static io.richard.event.annotations.EventRecordHeaders.EVENT_TIMESTAMP;
+import static io.richard.event.annotations.EventRecordHeaders.EVENT_VERSION;
+import static io.richard.event.annotations.EventRecordHeaders.ID;
+import static io.richard.event.annotations.EventRecordHeaders.IS_EVENT_DEAD;
+import static io.richard.event.annotations.EventRecordHeaders.MAX_RETRY;
+import static io.richard.event.annotations.EventRecordHeaders.NEXT_RETRY;
+import static io.richard.event.annotations.EventRecordHeaders.OBJECT_TYPE;
+import static io.richard.event.annotations.EventRecordHeaders.PARENT_ID;
+import static io.richard.event.annotations.EventRecordHeaders.PARTITION_KEY;
+import static io.richard.event.annotations.EventRecordHeaders.PUBLISHED_TIMESTAMP;
+import static io.richard.event.annotations.EventRecordHeaders.RETRY_COUNT;
+import static io.richard.event.annotations.EventRecordHeaders.SIMPLE_OBJECT_TYPE;
+import static io.richard.event.annotations.EventRecordHeaders.SOURCE;
+import static io.richard.event.annotations.EventRecordHeaders.SOURCE_TOPIC;
 
 import io.micronaut.configuration.kafka.annotation.ErrorStrategy;
 import io.micronaut.configuration.kafka.annotation.KafkaListener;
@@ -12,6 +47,7 @@ import io.richard.event.annotations.EventRecord;
 import io.richard.event.error.DeadLetterException;
 import io.richard.event.error.RetryableException;
 import io.richard.event.processor.DeadLetterEventPublisher;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,34 +77,90 @@ public class EventRecordKafkaListener {
         this.deadLetterEventPublisher = deadLetterEventPublisher;
     }
 
-    Map<String, Object> extractHeaders(ConsumerRecord<String, EventRecord> consumerRecord) {
+    Map<String, Object> extractHeaders(ConsumerRecord<String, byte[]> consumerRecord) {
+        /*
+
+    @JsonProperty("max_retry")
+    int maxRetry,
+
+    @JsonProperty("next_retry")
+    Instant nextRetry
+
+         */
         Map<String, Object> headers = new HashMap<>();
-        UUID correlationId = UUID.randomUUID();
         for (Header next : consumerRecord.headers()) {
-            if (next.key().equals("ce-trace-id")) {
-                headers.put("ce-trace-id", new String(next.value()));
+            if (next.key().equals(KAFKA_CLOUD_EVENT_TRACE_ID)) {
+                headers.put(CORRELATION_ID, UUID.nameUUIDFromBytes(next.value()));
             }
-            if (next.key().equals("correlation-id")) {
-                correlationId = UUID.fromString(new String(next.value()));
-                headers.put("correlation-id", correlationId.toString());
+            if (next.key().equals(KAFKA_CORRELATION_ID)) {
+                headers.put(CORRELATION_ID, UUID.nameUUIDFromBytes(next.value()));
+            }
+            if (next.key().equals(KAFKA_PARENT_ID)) {
+                headers.put(PARENT_ID, UUID.nameUUIDFromBytes(next.value()));
+            }
+            if (next.key().equals(KAFKA_IS_EVENT_DEAD)) {
+                headers.put(IS_EVENT_DEAD, Boolean.parseBoolean(new String(next.value())));
+            }
+            if (next.key().equals(KAFKA_SOURCE_TOPIC)) {
+                headers.put(SOURCE_TOPIC, new String(next.value()));
+            }
+            if (next.key().equals(KAFKA_ID)) {
+                headers.put(ID, new String(next.value()));
+            }
+            if (next.key().equals(KAFKA_CONTENT_TYPE)) {
+                headers.put(CONTENT_TYPE, new String(next.value()));
+            }
+            if (next.key().equals(KAFKA_EVENT_TIMESTAMP)) {
+                headers.put(EVENT_TIMESTAMP, Instant.parse(new String(next.value())));
+            }
+            if (next.key().equals(KAFKA_PUBLISHED_TIMESTAMP)) {
+                headers.put(PUBLISHED_TIMESTAMP, Instant.parse(new String(next.value())));
+            }
+
+            if (next.key().equals(KAFKA_OBJECT_TYPE)) {
+                headers.put(OBJECT_TYPE, new String(next.value()));
+            }
+            if (next.key().equals(KAFKA_EVENT_VERSION)) {
+                headers.put(EVENT_VERSION, Integer.valueOf(new String(next.value())));
+            }
+            if (next.key().equals(KAFKA_EVENT_PRIORITY)) {
+                headers.put(EVENT_PRIORITY, Integer.valueOf(new String(next.value())));
+            }
+            if (next.key().equals(KAFKA_SOURCE)) {
+                headers.put(SOURCE, new String(next.value()));
+            }
+            if (next.key().equals(KAFKA_PARTITION_KEY)) {
+                headers.put(PARTITION_KEY, new String(next.value()));
+            }
+            if (next.key().equals(KAFKA_SIMPLE_OBJECT_TYPE)) {
+                headers.put(SIMPLE_OBJECT_TYPE, new String(next.value()));
+            }
+            if (next.key().equals(KAFKA_MAX_RETRY)) {
+                headers.put(MAX_RETRY, Integer.parseInt(new String(next.value())));
+            }
+            if (next.key().equals(KAFKA_RETRY_COUNT)) {
+                headers.put(RETRY_COUNT, Integer.parseInt(new String(next.value())));
+            }
+            if (next.key().equals(KAFKA_NEXT_RETRY)) {
+                headers.put(NEXT_RETRY, Instant.parse(new String(next.value())));
             }
         }
 
-        if (!headers.containsKey("ce-trace-id")) {
-            headers.put("ce-trace-id", UUID.randomUUID().toString());
-        }
-
-        if (!headers.containsKey("correlation-id")) {
-            headers.put("correlation-id", correlationId.toString());
-        }
+        headers.putIfAbsent(EVENT_VERSION, 1);
+        headers.putIfAbsent(RETRY_COUNT, 0);
+        headers.putIfAbsent(MAX_RETRY, 3);
+        headers.putIfAbsent(CONTENT_TYPE, "application/json");
+        headers.putIfAbsent(CORRELATION_ID, UUID.randomUUID());
+        headers.putIfAbsent(ID, UUID.randomUUID());
+        headers.putIfAbsent(PUBLISHED_TIMESTAMP, Instant.now().toString());
         return headers;
     }
 
     @Topic("${app.event.retry.topic}")
-    void consumeRetryEvents(ConsumerRecord<String, EventRecord> consumerRecord,
+    void consumeRetryEvents(ConsumerRecord<String, byte[]> consumerRecord,
         Consumer<String, byte[]> kafkaConsumer) {
-        EventRecord eventRecord = consumerRecord.value();
-//        Map<String, Object> headers = extractHeaders(consumerRecord);
+        var eventData = consumerRecord.value();
+        Map<String, Object> headers = extractHeaders(consumerRecord);
 //        String correlationId = (String) headers.getOrDefault("correlation-id", UUID.randomUUID().toString());
 //        EventMetadata metadata = enrichMetadata(consumerRecord.topic(), correlationId, eventRecord.metadata());
 //        var finalEventRecord = eventRecord.withHeaders(headers);

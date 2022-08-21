@@ -4,7 +4,9 @@
 
 plugins {
     // Support convention plugins written in Kotlin. Convention plugins are build scripts in 'src/main' that automatically become available as plugins in the main build.
-    `kotlin-dsl`
+//    `kotlin-dsl`
+    id("org.gradle.kotlin.kotlin-dsl") version "2.3.3"
+//    id("org.gradle.kotlin.kotlin-dsl") version "2.4.1"
 }
 
 repositories {

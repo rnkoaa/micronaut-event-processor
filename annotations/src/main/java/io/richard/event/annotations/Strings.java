@@ -1,4 +1,4 @@
-package io.richard.event;
+package io.richard.event.annotations;
 
 public class Strings {
     public static boolean isNullOrEmpty(String value) {
