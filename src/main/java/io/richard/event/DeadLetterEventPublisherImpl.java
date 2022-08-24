@@ -8,6 +8,7 @@ import io.richard.event.annotations.EventRecord;
 import io.richard.event.annotations.RetryPolicy;
 import io.richard.event.processor.DeadLetterEventPublisher;
 import jakarta.inject.Singleton;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.Collection;
@@ -55,7 +56,7 @@ public class DeadLetterEventPublisherImpl implements DeadLetterEventPublisher {
         List<Header> kafkaHeaders = headers.entrySet()
             .stream()
             .map(it -> new RecordHeader(it.getKey(), getBytes(it)))
-            .map(it -> (Header)it)
+            .map(it -> (Header) it)
             .toList();
 
         return new RecordHeaders(kafkaHeaders);
@@ -63,10 +64,24 @@ public class DeadLetterEventPublisherImpl implements DeadLetterEventPublisher {
     }
 
     private static byte[] getBytes(Entry<String, Object> it) {
+        if (it.getValue() instanceof String s) {
+            return s.getBytes(Charset.defaultCharset());
+        }
+        if (it.getValue() instanceof UUID id) {
+            return id.toString().getBytes(Charset.defaultCharset());
+        }
+        if (it.getValue() instanceof Instant instant) {
+            return instant.toString().getBytes(Charset.defaultCharset());
+        }
+        if(it.getValue() instanceof Integer value) {
+            return ByteBuffer.allocate(4).putInt(value).array();
+        }
+        if(it.getValue() instanceof Boolean value) {
+            return new byte[] { value ? "1": "0"};
+        }
+
         return switch (it.getValue().getClass()) {
-            case String.class -> ((String) it.getValue()).getBytes(Charset.defaultCharset());
             case Integer.class, Boolean.class, Character.class -> String.valueOf(it.getValue()).getBytes();
-            case Instant.class, UUID.class -> it.getValue().toString().getBytes(Charset.defaultCharset());
             default -> throw new IllegalStateException("Unknown or Unsupported class");
         };
     }
