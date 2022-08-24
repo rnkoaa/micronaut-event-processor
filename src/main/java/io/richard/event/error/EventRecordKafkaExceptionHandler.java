@@ -4,6 +4,7 @@ import io.micronaut.configuration.kafka.exceptions.DefaultKafkaListenerException
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerException;
 import io.micronaut.configuration.kafka.exceptions.KafkaListenerExceptionHandler;
 import io.micronaut.context.annotation.Replaces;
+import io.richard.event.DeadLetterEventRecord;
 import io.richard.event.annotations.ErrorContext;
 import io.richard.event.annotations.ExceptionSummary;
 import jakarta.inject.Singleton;

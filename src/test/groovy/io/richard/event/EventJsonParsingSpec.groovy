@@ -5,7 +5,6 @@ import io.richard.event.annotations.Event
 import io.richard.event.annotations.EventMetadata
 import io.richard.event.annotations.EventRecord
 import io.richard.event.annotations.ExceptionSummary
-import io.richard.event.error.DeadLetterEventRecord
 
 class EventJsonParsingSpec extends AbstractApplicationContextSpec {
 

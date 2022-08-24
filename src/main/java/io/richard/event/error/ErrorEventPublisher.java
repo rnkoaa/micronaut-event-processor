@@ -4,6 +4,7 @@ import io.micronaut.configuration.kafka.annotation.KafkaClient;
 import io.micronaut.configuration.kafka.annotation.KafkaKey;
 import io.micronaut.configuration.kafka.annotation.Topic;
 
+import io.richard.event.DeadLetterEventRecord;
 import java.util.UUID;
 
 @KafkaClient

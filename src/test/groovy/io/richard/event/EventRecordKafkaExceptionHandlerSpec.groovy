@@ -7,7 +7,6 @@ import io.micronaut.configuration.kafka.annotation.OffsetReset
 import io.micronaut.configuration.kafka.annotation.Topic
 import io.micronaut.context.annotation.Primary
 import io.micronaut.context.annotation.Requires
-import io.richard.event.error.DeadLetterEventRecord
 import spock.lang.Shared
 
 import java.util.concurrent.ConcurrentLinkedDeque

@@ -1,12 +1,24 @@
 package io.richard.event;
 
-import io.richard.event.annotations.Event;
+import static io.richard.event.KafkaRecordHeaders.buildHeaders;
+
+import io.richard.event.annotations.ErrorContext;
 import io.richard.event.annotations.EventMetadata;
 import io.richard.event.annotations.EventRecord;
 import io.richard.event.annotations.RetryPolicy;
 import io.richard.event.processor.DeadLetterEventPublisher;
 import jakarta.inject.Singleton;
+import java.nio.charset.Charset;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
+import org.apache.kafka.common.header.Header;
+import org.apache.kafka.common.header.Headers;
+import org.apache.kafka.common.header.internals.RecordHeader;
+import org.apache.kafka.common.header.internals.RecordHeaders;
 
 @Singleton
 public class DeadLetterEventPublisherImpl implements DeadLetterEventPublisher {
@@ -18,12 +30,11 @@ public class DeadLetterEventPublisherImpl implements DeadLetterEventPublisher {
         this.kafkaEventPublisher = kafkaEventPublisher;
     }
 
-
     @Override
     public <T> void handle(T event, UUID correlationId, String partitionKey) {
-                var deadEventMetadata = new EventMetadata(
-                    event.getClass(), correlationId, partitionKey
-                ).withRetry(new RetryPolicy().markDead());
+        var deadEventMetadata = new EventMetadata(
+            event.getClass(), correlationId, partitionKey
+        ).withRetry(new RetryPolicy().markDead());
 
     }
 
@@ -31,5 +42,43 @@ public class DeadLetterEventPublisherImpl implements DeadLetterEventPublisher {
     public void handle(EventRecord eventRecord) {
 //        Event<?> event = eventRecord.getEvent(eventRecord.eventClass());
 //        kafkaEventPublisher.publishDeadLetter(event.getPartitionKey(), eventRecord);
+    }
+
+    @Override
+    public void handle(DeadLetterEventRecord eventRecord) {
+        // set headers and publish just the data
+        Headers kafkaHeaders = convert(buildHeaders(eventRecord.id(), eventRecord.metadata()));
+        kafkaEventPublisher.publishDeadLetter(eventRecord.metadata().partitionKey(), eventRecord.data(), kafkaHeaders);
+    }
+
+    Headers convert(Map<String, Object> headers) {
+        List<Header> kafkaHeaders = headers.entrySet()
+            .stream()
+            .map(it -> new RecordHeader(it.getKey(), getBytes(it)))
+            .map(it -> (Header)it)
+            .toList();
+
+        return new RecordHeaders(kafkaHeaders);
+
+    }
+
+    private static byte[] getBytes(Entry<String, Object> it) {
+        return switch (it.getValue().getClass()) {
+            case String.class -> ((String) it.getValue()).getBytes(Charset.defaultCharset());
+            case Integer.class, Boolean.class, Character.class -> String.valueOf(it.getValue()).getBytes();
+            case Instant.class, UUID.class -> it.getValue().toString().getBytes(Charset.defaultCharset());
+            default -> throw new IllegalStateException("Unknown or Unsupported class");
+        };
+    }
+
+    Map<String, Object> deadEvent(ErrorContext errorContext) {
+        return Map.of(
+            "created_At", errorContext.createdAt(),
+            "message_key", errorContext.messageKey(),
+            "partition", errorContext.partition(),
+            "offset", errorContext.offset(),
+            "error_summary", errorContext.summary().message()
+
+        );
     }
 }

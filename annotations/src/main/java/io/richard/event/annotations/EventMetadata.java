@@ -173,28 +173,4 @@ public record EventMetadata(
             priority, version, retry);
     }
 
-    public static EventMetadata fromKafkaEventHeaders(Map<String, Object> headers) {
-        Objects.requireNonNull(headers, "headers cannot be null");
-        var retry = new RetryPolicy(
-            (Integer) headers.getOrDefault(MAX_RETRY, 3),
-            (Integer) headers.getOrDefault(RETRY_COUNT, 0),
-            (Instant) headers.get(NEXT_RETRY),
-            (Boolean) headers.getOrDefault(IS_EVENT_DEAD, false));
-
-        return new EventMetadata(
-            (UUID) headers.getOrDefault(CORRELATION_ID, UUID.randomUUID()),
-            (String) headers.getOrDefault(CONTENT_TYPE, CONTENT_TYPE_JSON),
-            (String) headers.getOrDefault(PARTITION_KEY, ""),
-            (UUID) headers.get(PARENT_ID),
-            (Instant) headers.getOrDefault(EVENT_TIMESTAMP, Instant.now()),
-            (Instant) headers.getOrDefault(PUBLISHED_TIMESTAMP, Instant.now()),
-            (String) headers.getOrDefault(OBJECT_TYPE, ""),
-            (String) headers.getOrDefault(SIMPLE_OBJECT_TYPE, ""),
-            (String) headers.getOrDefault(SOURCE, ""),
-            (String) headers.getOrDefault(SOURCE_TOPIC, ""),
-            (Integer) headers.getOrDefault(EVENT_PRIORITY, 1),
-            (Integer) headers.getOrDefault(EVENT_VERSION, 1),
-            retry
-        );
-    }
 }
