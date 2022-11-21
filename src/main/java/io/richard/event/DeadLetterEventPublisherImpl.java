@@ -77,13 +77,9 @@ public class DeadLetterEventPublisherImpl implements DeadLetterEventPublisher {
             return ByteBuffer.allocate(4).putInt(value).array();
         }
         if(it.getValue() instanceof Boolean value) {
-            return new byte[] { value ? "1": "0"};
+            return new byte[] { value ? (byte) 1: (byte) 0};
         }
-
-        return switch (it.getValue().getClass()) {
-            case Integer.class, Boolean.class, Character.class -> String.valueOf(it.getValue()).getBytes();
-            default -> throw new IllegalStateException("Unknown or Unsupported class");
-        };
+        return null;
     }
 
     Map<String, Object> deadEvent(ErrorContext errorContext) {

@@ -27,7 +27,10 @@ import org.apache.kafka.common.TopicPartition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@KafkaListener(groupId = "${app.event.groupId}", offsetReset = OffsetReset.EARLIEST, errorStrategy = @ErrorStrategy(value = RESUME_AT_NEXT_RECORD, retryDelay = "50ms", retryCount = 0))
+@KafkaListener(groupId = "${app.event.groupId}",
+    offsetReset = OffsetReset.EARLIEST,
+    errorStrategy = @ErrorStrategy(value = RESUME_AT_NEXT_RECORD, retryDelay = "50ms", retryCount = 0)
+)
 public class EventRecordKafkaListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EventRecordKafkaListener.class);
